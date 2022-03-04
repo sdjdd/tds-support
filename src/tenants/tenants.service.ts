@@ -15,11 +15,7 @@ export class TenantsService {
   private tenantRepository: Repository<Tenant>;
 
   async create(data: CreateTenantDto): Promise<Tenant> {
-    if (await this.findOneBySubdomain(data.subdomain)) {
-      throw new ConflictException(
-        `subdomain "${data.subdomain}" already exists`,
-      );
-    }
+    await this.assertNoSubdomainConflict(data.subdomain);
 
     const tenant = new Tenant();
     tenant.subdomain = data.subdomain;
@@ -38,10 +34,20 @@ export class TenantsService {
     return this.tenantRepository.findOne({ subdomain });
   }
 
+  private async assertNoSubdomainConflict(subdomain) {
+    const tenant = await this.findOneBySubdomain(subdomain);
+    if (tenant) {
+      throw new ConflictException(`subdomain "${subdomain}" already exists`);
+    }
+  }
+
   async update(id: number, data: UpdateTenantDto) {
     const tenant = await this.tenantRepository.findOne(id);
     if (!tenant) {
       throw new NotFoundException(`tenant ${id} does not exist`);
+    }
+    if (data.subdomain && tenant.subdomain !== data.subdomain) {
+      await this.assertNoSubdomainConflict(data.subdomain);
     }
     await this.tenantRepository.update(id, {
       ...data,
