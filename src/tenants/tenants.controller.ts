@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CreateTenantDto } from './dtos/create-tenant.dto';
 import { UpdateTenantDto } from './dtos/update-tenant.dto';
 import { TenantsService } from './tenants.service';
@@ -20,8 +28,18 @@ export class TenantsController {
     return this.tenantsService.find();
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return this.tenantsService.findOneOrFail(id);
+  }
+
   @Patch(':id')
   async update(@Param('id') id: number, @Body() data: UpdateTenantDto) {
     await this.tenantsService.update(id, data);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: number) {
+    await this.tenantsService.softDelete(id);
   }
 }

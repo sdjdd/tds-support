@@ -30,6 +30,14 @@ export class TenantsService {
     return this.tenantRepository.find();
   }
 
+  async findOneOrFail(id: number): Promise<Tenant> {
+    const tenant = await this.tenantRepository.findOne(id);
+    if (!tenant) {
+      throw new NotFoundException(`tenant ${id} does not exist`);
+    }
+    return tenant;
+  }
+
   findOneBySubdomain(subdomain: string): Promise<Tenant | undefined> {
     return this.tenantRepository.findOne({ subdomain });
   }
@@ -42,16 +50,15 @@ export class TenantsService {
   }
 
   async update(id: number, data: UpdateTenantDto) {
-    const tenant = await this.tenantRepository.findOne(id);
-    if (!tenant) {
-      throw new NotFoundException(`tenant ${id} does not exist`);
-    }
+    const tenant = await this.findOneOrFail(id);
     if (data.subdomain && tenant.subdomain !== data.subdomain) {
       await this.assertNoSubdomainConflict(data.subdomain);
     }
-    await this.tenantRepository.update(id, {
-      ...data,
-      updated_at: () => 'NOW(3)',
-    });
+    await this.tenantRepository.update(id, data);
+  }
+
+  async softDelete(id: number) {
+    await this.findOneOrFail(id);
+    await this.tenantRepository.softDelete(id);
   }
 }
