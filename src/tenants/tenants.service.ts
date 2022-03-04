@@ -43,6 +43,9 @@ export class TenantsService {
     if (!tenant) {
       throw new NotFoundException(`tenant ${id} does not exist`);
     }
-    await this.tenantRepository.update(id, data);
+    await this.tenantRepository.update(id, {
+      ...data,
+      updated_at: () => 'NOW(3)',
+    });
   }
 }
