@@ -6,7 +6,9 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { MasterKeyGuard } from '@/common';
 import { CreateOrganizationDto } from './dtos/create-organization.dto';
 import { CreateSubdomainDto } from './dtos/create-subdomain.dto';
 import { UpdateOrganizationDto } from './dtos/update-organization.dto';
@@ -17,6 +19,7 @@ import { SubdomainsService } from './subdomains.service';
   host: process.env.ADMIN_DOMAIN,
   path: 'organizations',
 })
+@UseGuards(MasterKeyGuard)
 export class OrganizationsController {
   constructor(
     private organizationsService: OrganizationsService,
