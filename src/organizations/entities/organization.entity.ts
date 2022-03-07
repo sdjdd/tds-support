@@ -23,12 +23,12 @@ export class Organization {
   @OneToMany(() => Subdomain, (subdomain) => subdomain.organization)
   subdomains: Subdomain[];
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
-  @DeleteDateColumn()
-  deleted_at: Date;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
 }

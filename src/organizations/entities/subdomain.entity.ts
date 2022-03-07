@@ -17,8 +17,8 @@ export class Subdomain {
   @Expose()
   id: number;
 
-  @Column()
-  organization_id: number;
+  @Column({ name: 'organization_id' })
+  organizationId: number;
 
   @ManyToOne(() => Organization, (organization) => organization.subdomains)
   @JoinColumn({ name: 'organization_id' })
@@ -28,11 +28,11 @@ export class Subdomain {
   @Expose()
   subdomain: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   @Expose()
-  created_at: Date;
+  createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   @Expose()
-  updated_at: Date;
+  updatedAt: Date;
 }

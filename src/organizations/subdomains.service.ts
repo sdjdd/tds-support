@@ -35,7 +35,7 @@ export class SubdomainsService {
     }
     subdomain = new Subdomain();
     subdomain.organization = organization;
-    subdomain.organization_id = organization.id;
+    subdomain.organizationId = organization.id;
     subdomain.subdomain = data.subdomain;
     await this.subdomainRepository.insert(subdomain);
     return subdomain;
@@ -43,20 +43,20 @@ export class SubdomainsService {
 
   async find(organizationId: number): Promise<Subdomain[]> {
     await this.organizationsService.findOneOrFail(organizationId);
-    return this.subdomainRepository.find({ organization_id: organizationId });
+    return this.subdomainRepository.find({ organizationId });
   }
 
   async delete(organizationId: number, subdomainId: number) {
     await this.organizationsService.findOneOrFail(organizationId);
     const subdomain = await this.subdomainRepository.findOne({
-      organization_id: organizationId,
+      organizationId,
       id: subdomainId,
     });
     if (!subdomain) {
       throw new NotFoundException(`subdomain ${subdomainId} does not exist`);
     }
     await this.subdomainRepository.delete({
-      organization_id: organizationId,
+      organizationId,
       id: subdomainId,
     });
   }
