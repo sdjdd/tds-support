@@ -7,13 +7,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('tenants')
-export class Tenant {
+@Entity('projects')
+export class Project {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  subdomain: string;
 
   @Column()
   name: string;
