@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Project } from './project.entity';
+import { Organization } from './organization.entity';
 
 @Entity('subdomains')
 @Exclude()
@@ -18,11 +18,11 @@ export class Subdomain {
   id: number;
 
   @Column()
-  project_id: number;
+  organization_id: number;
 
-  @ManyToOne(() => Project, (project) => project.subdomains)
-  @JoinColumn({ name: 'project_id' })
-  project: Project;
+  @ManyToOne(() => Organization, (organization) => organization.subdomains)
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
   @Column()
   @Expose()

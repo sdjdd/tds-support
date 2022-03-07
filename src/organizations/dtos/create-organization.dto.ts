@@ -1,6 +1,6 @@
 import { IsOptional, IsString, Length } from 'class-validator';
 
-export class CreateProjectDto {
+export class CreateOrganizationDto {
   @Length(1, 255)
   @IsString()
   name: string;

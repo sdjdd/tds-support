@@ -7,45 +7,45 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { CreateProjectDto } from './dtos/create-project.dto';
+import { CreateOrganizationDto } from './dtos/create-organization.dto';
 import { CreateSubdomainDto } from './dtos/create-subdomain.dto';
-import { UpdateProjectDto } from './dtos/update-project.dto';
-import { ProjectsService } from './projects.service';
+import { UpdateOrganizationDto } from './dtos/update-organization.dto';
+import { OrganizationsService } from './organizations.service';
 import { SubdomainsService } from './subdomains.service';
 
 @Controller({
   host: process.env.ADMIN_DOMAIN,
-  path: 'projects',
+  path: 'organizations',
 })
-export class ProjectsController {
+export class OrganizationsController {
   constructor(
-    private projectsService: ProjectsService,
+    private organizationsService: OrganizationsService,
     private subdomainsService: SubdomainsService,
   ) {}
 
   @Post()
-  create(@Body() data: CreateProjectDto) {
-    return this.projectsService.create(data);
+  create(@Body() data: CreateOrganizationDto) {
+    return this.organizationsService.create(data);
   }
 
   @Get()
   find() {
-    return this.projectsService.find();
+    return this.organizationsService.find();
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.projectsService.findOneOrFail(id);
+    return this.organizationsService.findOneOrFail(id);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: number, @Body() data: UpdateProjectDto) {
-    await this.projectsService.update(id, data);
+  async update(@Param('id') id: number, @Body() data: UpdateOrganizationDto) {
+    await this.organizationsService.update(id, data);
   }
 
   @Delete(':id')
   async delete(@Param('id') id: number) {
-    await this.projectsService.softDelete(id);
+    await this.organizationsService.softDelete(id);
   }
 
   @Post(':id/subdomains')

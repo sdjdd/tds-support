@@ -7,24 +7,26 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateSubdomainDto } from './dtos/create-subdomain.dto';
 import { Subdomain } from './entities/subdomain.entity';
-import { ProjectsService } from './projects.service';
+import { OrganizationsService } from './organizations.service';
 
 @Injectable()
 export class SubdomainsService {
   @InjectRepository(Subdomain)
   private subdomainRepository: Repository<Subdomain>;
 
-  constructor(private projectsService: ProjectsService) {}
+  constructor(private organizationsService: OrganizationsService) {}
 
   findOneBySubdomain(subdomain: string): Promise<Subdomain | undefined> {
     return this.subdomainRepository.findOne({ subdomain });
   }
 
   async create(
-    projectId: number,
+    organizationId: number,
     data: CreateSubdomainDto,
   ): Promise<Subdomain> {
-    const project = await this.projectsService.findOneOrFail(projectId);
+    const organization = await this.organizationsService.findOneOrFail(
+      organizationId,
+    );
     let subdomain = await this.findOneBySubdomain(data.subdomain);
     if (subdomain) {
       throw new ConflictException(
@@ -32,29 +34,29 @@ export class SubdomainsService {
       );
     }
     subdomain = new Subdomain();
-    subdomain.project = project;
-    subdomain.project_id = project.id;
+    subdomain.organization = organization;
+    subdomain.organization_id = organization.id;
     subdomain.subdomain = data.subdomain;
     await this.subdomainRepository.insert(subdomain);
     return subdomain;
   }
 
-  async find(projectId: number): Promise<Subdomain[]> {
-    await this.projectsService.findOneOrFail(projectId);
-    return this.subdomainRepository.find({ project_id: projectId });
+  async find(organizationId: number): Promise<Subdomain[]> {
+    await this.organizationsService.findOneOrFail(organizationId);
+    return this.subdomainRepository.find({ organization_id: organizationId });
   }
 
-  async delete(projectId: number, subdomainId: number) {
-    await this.projectsService.findOneOrFail(projectId);
+  async delete(organizationId: number, subdomainId: number) {
+    await this.organizationsService.findOneOrFail(organizationId);
     const subdomain = await this.subdomainRepository.findOne({
-      project_id: projectId,
+      organization_id: organizationId,
       id: subdomainId,
     });
     if (!subdomain) {
       throw new NotFoundException(`subdomain ${subdomainId} does not exist`);
     }
     await this.subdomainRepository.delete({
-      project_id: projectId,
+      organization_id: organizationId,
       id: subdomainId,
     });
   }

@@ -9,8 +9,8 @@ import {
 } from 'typeorm';
 import { Subdomain } from './subdomain.entity';
 
-@Entity('projects')
-export class Project {
+@Entity('organizations')
+export class Organization {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -20,7 +20,7 @@ export class Project {
   @Column()
   description: string;
 
-  @OneToMany(() => Subdomain, (subdomain) => subdomain.project)
+  @OneToMany(() => Subdomain, (subdomain) => subdomain.organization)
   subdomains: Subdomain[];
 
   @CreateDateColumn()
