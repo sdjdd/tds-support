@@ -7,18 +7,18 @@ import { Organization } from './entities/organization.entity';
 import { OrganizationsService } from './organizations.service';
 
 describe('OrganizationsService', () => {
-  let mockRepository: Repository<Organization>;
+  let organizationsRepository: Repository<Organization>;
   let organizationsService: OrganizationsService;
 
   beforeEach(async () => {
-    mockRepository = createMockRepository();
+    organizationsRepository = createMockRepository();
 
     const module = await Test.createTestingModule({
       providers: [
         OrganizationsService,
         {
           provide: getRepositoryToken(Organization),
-          useValue: mockRepository,
+          useValue: organizationsRepository,
         },
       ],
     }).compile();
@@ -27,88 +27,94 @@ describe('OrganizationsService', () => {
   });
 
   describe('create', () => {
-    it('should insert with organization repository', async () => {
-      const spy = jest.spyOn(mockRepository, 'insert');
+    it('should insert organization', async () => {
+      const spy = jest.spyOn(organizationsRepository, 'insert');
       await organizationsService.create({
-        name: 'xd',
-        description: 'xd company',
+        name: 'org-name',
+        description: 'org-desc',
       });
       expect(spy.mock.calls[0][0]).toEqual({
-        name: 'xd',
-        description: 'xd company',
+        name: 'org-name',
+        description: 'org-desc',
       });
     });
 
-    it('should fill default values', async () => {
-      const spy = jest.spyOn(mockRepository, 'insert');
+    it('should set default values', async () => {
+      const spy = jest.spyOn(organizationsRepository, 'insert');
       await organizationsService.create({
-        name: 'xd',
+        name: 'org-name',
       });
       expect(spy.mock.calls[0][0]).toEqual({
-        name: 'xd',
+        name: 'org-name',
         description: '',
       });
     });
   });
 
   describe('find', () => {
-    it('should call find directly', async () => {
-      const spy = jest.spyOn(mockRepository, 'find');
+    it('should find organizations', async () => {
+      const spy = jest.spyOn(organizationsRepository, 'find');
       await organizationsService.find();
       expect(spy.mock.calls.length).toBe(1);
     });
   });
 
   describe('findOrFail', () => {
-    it('should throw NotFoundException when no data returned', () => {
-      jest.spyOn(mockRepository, 'findOne').mockResolvedValue(undefined);
-      expect(organizationsService.findOneOrFail(1)).rejects.toThrow(
+    it('should throw NotFoundException when organization not exists', async () => {
+      jest
+        .spyOn(organizationsRepository, 'findOne')
+        .mockResolvedValue(undefined);
+      await expect(organizationsService.findOneOrFail(1)).rejects.toThrow(
         NotFoundException,
       );
     });
   });
 
   describe('update', () => {
-    it('should ok', async () => {
-      const spyUpdate = jest.spyOn(mockRepository, 'update');
+    it('should update organization', async () => {
+      const spy = jest.spyOn(organizationsRepository, 'update');
       jest
-        .spyOn(mockRepository, 'findOne')
+        .spyOn(organizationsRepository, 'findOne')
         .mockResolvedValue(new Organization());
       await organizationsService.update(1, {
-        name: 'name',
-        description: 'description',
+        name: 'new-org-name',
+        description: 'new-org-desc',
       });
-      expect(spyUpdate.mock.calls[0][0]).toBe(1);
-      expect(spyUpdate.mock.calls[0][1]).toEqual({
-        name: 'name',
-        description: 'description',
+      expect(spy.mock.calls[0][0]).toBe(1);
+      expect(spy.mock.calls[0][1]).toEqual({
+        name: 'new-org-name',
+        description: 'new-org-desc',
       });
     });
 
-    it('should throw NotFoundException when organization does not exists', () => {
-      jest.spyOn(mockRepository, 'findOne').mockResolvedValue(undefined);
-      expect(
+    it('should throw NotFoundException organization not exists', async () => {
+      jest
+        .spyOn(organizationsRepository, 'findOne')
+        .mockResolvedValue(undefined);
+      await expect(
         organizationsService.update(1, {
-          name: 'name',
-          description: 'description',
+          name: 'new-org-name',
+          description: 'new-org-desc',
         }),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('softDelete', () => {
-    it('should call softDelete of repository', async () => {
+    it('should soft delete organization', async () => {
       jest
-        .spyOn(mockRepository, 'findOne')
+        .spyOn(organizationsRepository, 'findOne')
         .mockResolvedValue(new Organization());
-      const spy = jest.spyOn(mockRepository, 'softDelete');
+      const spy = jest.spyOn(organizationsRepository, 'softDelete');
       await organizationsService.softDelete(1);
       expect(spy.mock.calls[0][0]).toBe(1);
     });
 
-    it('should throw NotFoundException when organization does not exists', () => {
-      jest.spyOn(mockRepository, 'findOne').mockResolvedValue(undefined);
-      expect(organizationsService.softDelete(1)).rejects.toThrow(
+    it('should throw NotFoundException when organization not exists', async () => {
+      jest
+        .spyOn(organizationsRepository, 'findOne')
+        .mockResolvedValue(undefined);
+      await expect(organizationsService.softDelete(1)).rejects.toThrow(
         NotFoundException,
       );
     });
