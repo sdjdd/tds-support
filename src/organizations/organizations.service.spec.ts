@@ -1,40 +1,48 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { createMockRepository, MockRepository } from '@/common/mocks';
+import { Repository } from 'typeorm';
 import { Organization } from './entities/organization.entity';
 import { OrganizationsService } from './organizations.service';
 
 describe('OrganizationsService', () => {
-  let organizationsRepository: MockRepository;
+  let organizationsRepository: Repository<Organization>;
   let organizationsService: OrganizationsService;
 
   beforeEach(async () => {
-    organizationsRepository = createMockRepository();
-
     const module = await Test.createTestingModule({
       providers: [
         OrganizationsService,
         {
           provide: getRepositoryToken(Organization),
-          useValue: organizationsRepository,
+          useValue: {
+            find: jest.fn(),
+            findOne: jest.fn(),
+            insert: jest.fn(),
+            softDelete: jest.fn(),
+            update: jest.fn(),
+          },
         },
       ],
     }).compile();
 
+    organizationsRepository = module.get(getRepositoryToken(Organization));
     organizationsService = module.get(OrganizationsService);
   });
 
   describe('create', () => {
     it('should insert organization', async () => {
-      await organizationsService.create({
+      const organization = await organizationsService.create({
         name: 'org-name',
         description: 'org-desc',
+        subdomain: 'support',
       });
       expect(organizationsRepository.insert).toBeCalledWith({
         name: 'org-name',
         description: 'org-desc',
+        subdomain: 'support',
       });
+      expect(organization).toBeInstanceOf(Organization);
     });
 
     it('should set default values', async () => {
@@ -46,6 +54,19 @@ describe('OrganizationsService', () => {
         description: '',
       });
     });
+
+    it('should throw when subdomain already exists', async () => {
+      jest
+        .spyOn(organizationsService, 'findOneBySubdomain')
+        .mockResolvedValue(new Organization());
+      await expect(
+        organizationsService.create({
+          name: 'org-name',
+          description: 'org-desc',
+          subdomain: 'support',
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
   });
 
   describe('find', () => {
@@ -56,8 +77,7 @@ describe('OrganizationsService', () => {
   });
 
   describe('findOrFail', () => {
-    it('should throw NotFoundException when organization not exists', async () => {
-      organizationsRepository.findOne.mockResolvedValue(undefined);
+    it('should throw when organization not exists', async () => {
       await expect(organizationsService.findOneOrFail(1)).rejects.toThrow(
         NotFoundException,
       );
@@ -66,19 +86,22 @@ describe('OrganizationsService', () => {
 
   describe('update', () => {
     it('should update organization', async () => {
-      organizationsRepository.findOne.mockResolvedValue(new Organization());
+      jest
+        .spyOn(organizationsRepository, 'findOne')
+        .mockResolvedValueOnce(new Organization());
       await organizationsService.update(1, {
         name: 'new-org-name',
         description: 'new-org-desc',
+        subdomain: 'new-subdomain',
       });
       expect(organizationsRepository.update).toBeCalledWith(1, {
         name: 'new-org-name',
         description: 'new-org-desc',
+        subdomain: 'new-subdomain',
       });
     });
 
-    it('should throw NotFoundException organization not exists', async () => {
-      organizationsRepository.findOne.mockResolvedValue(undefined);
+    it('should throw when organization not exists', async () => {
       await expect(
         organizationsService.update(1, {
           name: 'new-org-name',
@@ -86,17 +109,48 @@ describe('OrganizationsService', () => {
         }),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should throw when subdomain already exists', async () => {
+      jest
+        .spyOn(organizationsRepository, 'findOne')
+        .mockResolvedValueOnce(new Organization());
+      jest
+        .spyOn(organizationsService, 'findOneBySubdomain')
+        .mockResolvedValue(new Organization());
+      await expect(
+        organizationsService.update(1, {
+          subdomain: 'some-subdomain',
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should not throw when subdoman not changed', async () => {
+      const organization = new Organization();
+      organization.subdomain = 'some-subdomain';
+      jest
+        .spyOn(organizationsRepository, 'findOne')
+        .mockResolvedValueOnce(organization);
+      jest
+        .spyOn(organizationsService, 'findOneBySubdomain')
+        .mockResolvedValue(new Organization());
+      await expect(
+        organizationsService.update(1, {
+          subdomain: 'some-subdomain',
+        }),
+      ).resolves.not.toThrowError();
+    });
   });
 
   describe('softDelete', () => {
     it('should soft delete organization', async () => {
-      organizationsRepository.findOne.mockResolvedValue(new Organization());
+      jest
+        .spyOn(organizationsRepository, 'findOne')
+        .mockResolvedValueOnce(new Organization());
       await organizationsService.softDelete(1);
       expect(organizationsRepository.softDelete).toBeCalledWith(1);
     });
 
-    it('should throw NotFoundException when organization not exists', async () => {
-      organizationsRepository.findOne.mockResolvedValue(undefined);
+    it('should throw when organization not exists', async () => {
       await expect(organizationsService.softDelete(1)).rejects.toThrow(
         NotFoundException,
       );

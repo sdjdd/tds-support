@@ -1,37 +1,42 @@
-import { createMockRepository, MockRepository } from '@/common/mocks';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Organization } from './entities/organization.entity';
+import { Repository } from 'typeorm';
 import { Domain } from './entities/domain.entity';
 import { OrganizationsService } from './organizations.service';
 import { DomainsService } from './domains.service';
 
 describe('DomainsService', () => {
   let domainsService: DomainsService;
-  let domainsRepository: MockRepository;
-  let organizationsRepository: MockRepository;
+  let domainsRepository: Repository<Domain>;
+  let organizationsService: OrganizationsService;
 
   beforeEach(async () => {
-    domainsRepository = createMockRepository();
-    organizationsRepository = createMockRepository();
-
     const module = await Test.createTestingModule({
       providers: [
         OrganizationsService,
         DomainsService,
         {
           provide: getRepositoryToken(Domain),
-          useValue: domainsRepository,
+          useValue: {
+            delete: jest.fn(),
+            find: jest.fn(),
+            findOne: jest.fn(),
+            insert: jest.fn(),
+          },
         },
         {
-          provide: getRepositoryToken(Organization),
-          useValue: organizationsRepository,
+          provide: OrganizationsService,
+          useValue: {
+            findOneOrFail: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     domainsService = module.get(DomainsService);
+    domainsRepository = module.get(getRepositoryToken(Domain));
+    organizationsService = module.get(OrganizationsService);
   });
 
   describe('findOneByDomain', () => {
@@ -45,21 +50,19 @@ describe('DomainsService', () => {
 
   describe('create', () => {
     it('should insert domain', async () => {
-      organizationsRepository.findOne.mockResolvedValue(new Organization());
-      domainsRepository.findOne.mockResolvedValue(undefined);
+      jest.spyOn(domainsRepository, 'findOne').mockResolvedValue(undefined);
       const entity = await domainsService.create(1, {
         domain: 'some-domain',
       });
-      expect(entity).toBeInstanceOf(Domain);
       expect(domainsRepository.insert).toBeCalledWith({
         organizationId: 1,
         domain: 'some-domain',
       });
+      expect(entity).toBeInstanceOf(Domain);
     });
 
     it('should throw when domain already exists', async () => {
-      organizationsRepository.findOne.mockResolvedValue(new Organization());
-      domainsRepository.findOne.mockResolvedValue(new Domain());
+      jest.spyOn(domainsRepository, 'findOne').mockResolvedValue(new Domain());
       await expect(
         domainsService.create(1, {
           domain: 'some-domain',
@@ -70,21 +73,21 @@ describe('DomainsService', () => {
 
   describe('find', () => {
     it('should find domains for organization', async () => {
-      organizationsRepository.findOne.mockResolvedValue(new Organization());
       await domainsService.find(1);
       expect(domainsRepository.find).toBeCalledWith({ organizationId: 1 });
     });
 
     it('should throw NotFoundException when organization not exists', async () => {
-      organizationsRepository.findOne.mockResolvedValue(undefined);
+      jest
+        .spyOn(organizationsService, 'findOneOrFail')
+        .mockRejectedValue(new NotFoundException());
       await expect(domainsService.find(1)).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('delete', () => {
     it('should delete domain', async () => {
-      organizationsRepository.findOne.mockResolvedValue(new Organization());
-      domainsRepository.findOne.mockResolvedValue(new Domain());
+      jest.spyOn(domainsRepository, 'findOne').mockResolvedValue(new Domain());
       await domainsService.delete(1, 1);
       expect(domainsRepository.delete).toBeCalledWith({
         organizationId: 1,
@@ -93,7 +96,6 @@ describe('DomainsService', () => {
     });
 
     it('should throw when domain not exists', async () => {
-      organizationsRepository.findOne.mockResolvedValue(new Organization());
       await expect(domainsService.delete(1, 1)).rejects.toThrow(
         NotFoundException,
       );
