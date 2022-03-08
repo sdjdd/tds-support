@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateOrganizationDto } from './dtos/create-organization.dto';
@@ -10,10 +14,22 @@ export class OrganizationsService {
   @InjectRepository(Organization)
   private organizationsRepository: Repository<Organization>;
 
+  private async assertNoSubdomainConflict(subdomain: string) {
+    const organization = await this.findOneBySubdomain(subdomain);
+    if (organization) {
+      throw new ConflictException(`subdomain "${subdomain}" already exists`);
+    }
+  }
+
   async create(data: CreateOrganizationDto): Promise<Organization> {
+    if (data.subdomain) {
+      await this.assertNoSubdomainConflict(data.subdomain);
+    }
+
     const organization = new Organization();
     organization.name = data.name;
     organization.description = data.description ?? '';
+    organization.subdomain = data.subdomain;
 
     await this.organizationsRepository.insert(organization);
     return organization;
@@ -31,8 +47,18 @@ export class OrganizationsService {
     return organization;
   }
 
+  findOneBySubdomain(subdomain: string): Promise<Organization | undefined> {
+    return this.organizationsRepository.findOne({ subdomain });
+  }
+
   async update(id: number, data: UpdateOrganizationDto) {
-    await this.findOneOrFail(id);
+    const organization = await this.findOneOrFail(id);
+    if (
+      data.subdomain !== undefined &&
+      organization.subdomain !== data.subdomain
+    ) {
+      await this.assertNoSubdomainConflict(data.subdomain);
+    }
     await this.organizationsRepository.update(id, data);
   }
 

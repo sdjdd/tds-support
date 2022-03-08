@@ -20,6 +20,9 @@ export class Organization {
   @Column()
   description: string;
 
+  @Column()
+  subdomain: string;
+
   @OneToMany(() => Domain, (domain) => domain.organization)
   domains: Domain[];
 
