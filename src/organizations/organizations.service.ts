@@ -8,23 +8,23 @@ import { Organization } from './entities/organization.entity';
 @Injectable()
 export class OrganizationsService {
   @InjectRepository(Organization)
-  private organizationRepository: Repository<Organization>;
+  private organizationsRepository: Repository<Organization>;
 
   async create(data: CreateOrganizationDto): Promise<Organization> {
     const organization = new Organization();
     organization.name = data.name;
     organization.description = data.description ?? '';
 
-    await this.organizationRepository.insert(organization);
+    await this.organizationsRepository.insert(organization);
     return organization;
   }
 
   find(): Promise<Organization[]> {
-    return this.organizationRepository.find();
+    return this.organizationsRepository.find();
   }
 
   async findOneOrFail(id: number): Promise<Organization> {
-    const organization = await this.organizationRepository.findOne(id);
+    const organization = await this.organizationsRepository.findOne(id);
     if (!organization) {
       throw new NotFoundException(`organization ${id} does not exist`);
     }
@@ -33,11 +33,11 @@ export class OrganizationsService {
 
   async update(id: number, data: UpdateOrganizationDto) {
     await this.findOneOrFail(id);
-    await this.organizationRepository.update(id, data);
+    await this.organizationsRepository.update(id, data);
   }
 
   async softDelete(id: number) {
     await this.findOneOrFail(id);
-    await this.organizationRepository.softDelete(id);
+    await this.organizationsRepository.softDelete(id);
   }
 }

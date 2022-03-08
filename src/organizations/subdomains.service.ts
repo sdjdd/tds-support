@@ -12,12 +12,12 @@ import { OrganizationsService } from './organizations.service';
 @Injectable()
 export class SubdomainsService {
   @InjectRepository(Subdomain)
-  private subdomainRepository: Repository<Subdomain>;
+  private subdomainsRepository: Repository<Subdomain>;
 
   constructor(private organizationsService: OrganizationsService) {}
 
   findOneBySubdomain(subdomain: string): Promise<Subdomain | undefined> {
-    return this.subdomainRepository.findOne({ subdomain });
+    return this.subdomainsRepository.findOne({ subdomain });
   }
 
   async create(
@@ -37,25 +37,25 @@ export class SubdomainsService {
     subdomain.organization = organization;
     subdomain.organizationId = organization.id;
     subdomain.subdomain = data.subdomain;
-    await this.subdomainRepository.insert(subdomain);
+    await this.subdomainsRepository.insert(subdomain);
     return subdomain;
   }
 
   async find(organizationId: number): Promise<Subdomain[]> {
     await this.organizationsService.findOneOrFail(organizationId);
-    return this.subdomainRepository.find({ organizationId });
+    return this.subdomainsRepository.find({ organizationId });
   }
 
   async delete(organizationId: number, subdomainId: number) {
     await this.organizationsService.findOneOrFail(organizationId);
-    const subdomain = await this.subdomainRepository.findOne({
+    const subdomain = await this.subdomainsRepository.findOne({
       organizationId,
       id: subdomainId,
     });
     if (!subdomain) {
       throw new NotFoundException(`subdomain ${subdomainId} does not exist`);
     }
-    await this.subdomainRepository.delete({
+    await this.subdomainsRepository.delete({
       organizationId,
       id: subdomainId,
     });
