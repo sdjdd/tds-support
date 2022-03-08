@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Subdomain } from './subdomain.entity';
+import { Domain } from './domain.entity';
 
 @Entity('organizations')
 export class Organization {
@@ -20,8 +20,8 @@ export class Organization {
   @Column()
   description: string;
 
-  @OneToMany(() => Subdomain, (subdomain) => subdomain.organization)
-  subdomains: Subdomain[];
+  @OneToMany(() => Domain, (domain) => domain.organization)
+  domains: Domain[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

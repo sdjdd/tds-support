@@ -10,9 +10,9 @@ import {
 } from 'typeorm';
 import { Organization } from './organization.entity';
 
-@Entity('subdomains')
+@Entity('domains')
 @Exclude()
-export class Subdomain {
+export class Domain {
   @PrimaryGeneratedColumn()
   @Expose()
   id: number;
@@ -20,13 +20,13 @@ export class Subdomain {
   @Column({ name: 'organization_id' })
   organizationId: number;
 
-  @ManyToOne(() => Organization, (organization) => organization.subdomains)
+  @ManyToOne(() => Organization, (organization) => organization.domains)
   @JoinColumn({ name: 'organization_id' })
   organization: Organization;
 
   @Column()
   @Expose()
-  subdomain: string;
+  domain: string;
 
   @CreateDateColumn({ name: 'created_at' })
   @Expose()

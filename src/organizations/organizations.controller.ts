@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { MasterKeyGuard } from '@/common';
 import { CreateOrganizationDto } from './dtos/create-organization.dto';
-import { CreateSubdomainDto } from './dtos/create-subdomain.dto';
+import { CreateDomainDto } from './dtos/create-domain.dto';
 import { UpdateOrganizationDto } from './dtos/update-organization.dto';
 import { OrganizationsService } from './organizations.service';
-import { SubdomainsService } from './subdomains.service';
+import { DomainsService } from './domains.service';
 
 @Controller({
   host: process.env.ADMIN_DOMAIN,
@@ -23,7 +23,7 @@ import { SubdomainsService } from './subdomains.service';
 export class OrganizationsController {
   constructor(
     private organizationsService: OrganizationsService,
-    private subdomainsService: SubdomainsService,
+    private domainsService: DomainsService,
   ) {}
 
   @Post()
@@ -51,21 +51,21 @@ export class OrganizationsController {
     await this.organizationsService.softDelete(id);
   }
 
-  @Post(':id/subdomains')
-  createSubdomain(@Param('id') id: number, @Body() data: CreateSubdomainDto) {
-    return this.subdomainsService.create(id, data);
+  @Post(':id/domains')
+  createDomain(@Param('id') id: number, @Body() data: CreateDomainDto) {
+    return this.domainsService.create(id, data);
   }
 
-  @Get(':id/subdomains')
-  findSubdomains(@Param('id') id: number) {
-    return this.subdomainsService.find(id);
+  @Get(':id/domains')
+  findDomains(@Param('id') id: number) {
+    return this.domainsService.find(id);
   }
 
-  @Delete(':id/subdomains/:subdomainId')
-  async deleteSubdomain(
+  @Delete(':id/domains/:domainId')
+  async deleteDomain(
     @Param('id') id: number,
-    @Param('subdomainId') subdomainId: number,
+    @Param('domainId') domainId: number,
   ) {
-    await this.subdomainsService.delete(id, subdomainId);
+    await this.domainsService.delete(id, domainId);
   }
 }

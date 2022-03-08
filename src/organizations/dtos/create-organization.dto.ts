@@ -1,4 +1,4 @@
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsOptional, IsString, Length, Matches } from 'class-validator';
 
 export class CreateOrganizationDto {
   @Length(1, 255)
@@ -9,4 +9,13 @@ export class CreateOrganizationDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  // Ref: https://stackoverflow.com/questions/7930751/regexp-for-subdomain
+  // But no capitals
+  @Matches(/^[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?$/, {
+    message: 'invalid domain',
+  })
+  @IsString()
+  @IsOptional()
+  subdomain?: string;
 }
