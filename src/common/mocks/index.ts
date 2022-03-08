@@ -4,6 +4,7 @@ export function createMockRepository() {
     find: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
     softDelete: jest.fn(),
   };
 }

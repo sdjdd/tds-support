@@ -24,9 +24,7 @@ export class SubdomainsService {
     organizationId: number,
     data: CreateSubdomainDto,
   ): Promise<Subdomain> {
-    const organization = await this.organizationsService.findOneOrFail(
-      organizationId,
-    );
+    await this.organizationsService.findOneOrFail(organizationId);
     let subdomain = await this.findOneBySubdomain(data.subdomain);
     if (subdomain) {
       throw new ConflictException(
@@ -34,8 +32,7 @@ export class SubdomainsService {
       );
     }
     subdomain = new Subdomain();
-    subdomain.organization = organization;
-    subdomain.organizationId = organization.id;
+    subdomain.organizationId = organizationId;
     subdomain.subdomain = data.subdomain;
     await this.subdomainsRepository.insert(subdomain);
     return subdomain;
