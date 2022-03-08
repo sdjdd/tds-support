@@ -5,5 +5,7 @@ export function createMockRepository() {
     findOne: jest.fn(),
     update: jest.fn(),
     softDelete: jest.fn(),
-  } as any;
+  };
 }
+
+export type MockRepository = ReturnType<typeof createMockRepository>;
