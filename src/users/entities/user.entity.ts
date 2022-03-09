@@ -46,7 +46,7 @@ export class User {
 
   comparePassword(password: string): Promise<boolean> {
     if (!this.password) {
-      throw new Error('user has no password, please check you sql statement');
+      throw new Error('user has no password, please check query statement');
     }
     return argon2.verify(this.password, password);
   }
