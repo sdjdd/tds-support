@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsOptional, IsString, Length, Matches } from 'class-validator';
 
 export class CreateOrganizationDto {
@@ -10,12 +11,12 @@ export class CreateOrganizationDto {
   @IsOptional()
   description?: string;
 
-  // Ref: https://stackoverflow.com/questions/7930751/regexp-for-subdomain
-  // But no capitals
-  @Matches(/^[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?$/, {
-    message: 'invalid domain',
+  // https://stackoverflow.com/questions/7930751/regexp-for-subdomain
+  @Matches(/[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?/, {
+    message: 'invalid subdomain',
   })
   @IsString()
   @IsOptional()
+  @Transform(({ value }) => value.toLowerCase())
   subdomain?: string;
 }
