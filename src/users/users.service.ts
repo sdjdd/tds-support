@@ -1,7 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import argon2 from 'argon2';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 
@@ -22,6 +21,19 @@ export class UsersService {
     email: string,
   ): Promise<User | undefined> {
     return this.usersRepository.findOne({ organizationId, email });
+  }
+
+  findOneByUsernameAndSelectPassword(
+    organizationId: number,
+    username: string,
+  ): Promise<User | undefined> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.organization_id = :organizationId')
+      .andWhere('user.username = :username')
+      .setParameters({ organizationId, username })
+      .getOne();
   }
 
   private async assertNoUsernameConflict(
@@ -49,7 +61,7 @@ export class UsersService {
     const user = new User();
     user.organizationId = organizationId;
     user.username = data.username;
-    user.password = await argon2.hash(data.password);
+    await user.setPassword(data.password);
     user.email = data.email;
     user.role = data.role ?? 'end-user';
     await this.usersRepository.insert(user);
