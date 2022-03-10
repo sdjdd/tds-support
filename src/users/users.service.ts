@@ -1,13 +1,44 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { PaginationDto } from './dtos/pagination.dto';
 
 @Injectable()
 export class UsersService {
   @InjectRepository(User)
   private usersRepository: Repository<User>;
+
+  find(
+    organizationId: number,
+    { page, pageSize }: PaginationDto = {},
+  ): Promise<User[]> {
+    return this.usersRepository.find({
+      where: {
+        organizationId,
+      },
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    });
+  }
+
+  findOne(organizationId: number, id: number): Promise<User | undefined> {
+    return this.usersRepository.findOne({ organizationId, id });
+  }
+
+  async findOneOrFail(organizationId: number, id: number): Promise<User> {
+    const user = await this.findOne(organizationId, id);
+    if (!user) {
+      throw new NotFoundException(`user ${id} does not exist`);
+    }
+    return user;
+  }
 
   findOneByUsername(
     organizationId: number,
@@ -63,8 +94,16 @@ export class UsersService {
     user.username = data.username;
     await user.setPassword(data.password);
     user.email = data.email;
-    user.role = data.role ?? 'end-user';
+    user.role = 'end-user';
     await this.usersRepository.insert(user);
     return user;
+  }
+
+  async update(organizationId: number, id: number, data: UpdateUserDto) {
+    const user = await this.findOneOrFail(organizationId, id);
+    if (data.email && data.email !== user.email) {
+      await this.assertNoEmailConflict(organizationId, data.email);
+    }
+    await this.usersRepository.update({ organizationId, id }, data);
   }
 }

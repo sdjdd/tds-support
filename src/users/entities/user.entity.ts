@@ -1,20 +1,11 @@
 import { Exclude, Expose } from 'class-transformer';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import argon2 from 'argon2';
+import { BaseEntity } from '@/common/entities';
 
 @Entity('users')
 @Exclude()
-export class User {
-  @PrimaryGeneratedColumn()
-  @Expose()
-  id: number;
-
+export class User extends BaseEntity {
   @Column({ name: 'organization_id' })
   organizationId: number;
 
@@ -32,14 +23,6 @@ export class User {
   @Expose()
   role: 'end-user' | 'agent' | 'admin';
 
-  @CreateDateColumn({ name: 'created_at' })
-  @Expose()
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  @Expose()
-  updatedAt: Date;
-
   async setPassword(password: string) {
     this.password = await argon2.hash(password);
   }
@@ -49,5 +32,13 @@ export class User {
       throw new Error('user has no password, please check query statement');
     }
     return argon2.verify(this.password, password);
+  }
+
+  isAdmin() {
+    return this.role === 'admin';
+  }
+
+  isAgent() {
+    return this.isAdmin() || this.role === 'agent';
   }
 }

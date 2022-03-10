@@ -1,6 +1,5 @@
-import { IsEmail, IsIn, IsOptional, IsString, Length } from 'class-validator';
+import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 import { Trim } from '@/common/transformers';
-import { User } from '../entities/user.entity';
 
 export class CreateUserDto {
   @Length(1, 32)
@@ -17,8 +16,4 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   email?: string;
-
-  @IsIn(['end-user', 'agent', 'admin'])
-  @IsOptional()
-  role?: User['role'];
 }
