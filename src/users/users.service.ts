@@ -8,7 +8,14 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { PaginationDto } from './dtos/pagination.dto';
+import { UserRole } from './types';
+
+interface FindUsersOptions {
+  take?: number;
+  skip?: number;
+  cursor?: number;
+  role?: UserRole | UserRole[];
+}
 
 @Injectable()
 export class UsersService {
@@ -17,15 +24,29 @@ export class UsersService {
 
   find(
     organizationId: number,
-    { page, pageSize }: PaginationDto = {},
+    { skip, take, role, cursor }: FindUsersOptions = {},
   ): Promise<User[]> {
-    return this.usersRepository.find({
-      where: {
-        organizationId,
-      },
-      take: pageSize,
-      skip: (page - 1) * pageSize,
-    });
+    const qb = this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.organizationId = :organizationId', { organizationId });
+
+    if (role) {
+      if (Array.isArray(role)) {
+        qb.andWhere('user.role IN (:...role)', { role });
+      } else {
+        qb.andWhere('user.role = :role', { role });
+      }
+    }
+
+    if (skip) {
+      qb.skip(skip);
+    }
+
+    if (cursor) {
+      qb.andWhere('user.id > :cursor', { cursor });
+    }
+
+    return qb.take(take).orderBy('user.id').getMany();
   }
 
   findOne(organizationId: number, id: number): Promise<User | undefined> {

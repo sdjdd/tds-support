@@ -1,10 +1,11 @@
 import { PickType } from '@nestjs/mapped-types';
 import { IsIn, IsOptional } from 'class-validator';
-import { User } from '../entities/user.entity';
+import { USER_ROLES } from '../constants';
+import { UserRole } from '../types';
 import { CreateUserDto } from './create-user.dto';
 
 export class UpdateUserDto extends PickType(CreateUserDto, ['email']) {
-  @IsIn(['end-user', 'agent', 'admin'])
+  @IsIn(USER_ROLES)
   @IsOptional()
-  role?: User['role'];
+  role?: UserRole;
 }

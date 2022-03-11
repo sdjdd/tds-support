@@ -10,13 +10,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AllowRole, AuthGuard, CurrentUser, Org, RoleGuard } from '@/common';
+import { AuthGuard, CurrentUser, Org } from '@/common';
 import { Organization } from '@/organizations';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { PaginationDto } from './dtos/pagination.dto';
+import { FindUsersParams } from './dtos/find-users-params.dto';
 
 @Controller('users')
 export class UsersController {
@@ -32,13 +32,24 @@ export class UsersController {
   async update(
     @Org() org: Organization,
     @CurrentUser() currentUser: User,
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateUserDto,
   ) {
-    if (!currentUser.isAdmin() && (currentUser.id !== id || data.role)) {
-      throw new ForbiddenException();
+    if (!currentUser.isAdmin()) {
+      if (currentUser.id !== id) {
+        throw new ForbiddenException();
+      }
+      if (data.role) {
+        throw new ForbiddenException();
+      }
     }
     await this.usersService.update(org.id, id, data);
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  findSelf(@CurrentUser() currentUser: User) {
+    return currentUser;
   }
 
   @Get(':id')
@@ -48,19 +59,24 @@ export class UsersController {
     @CurrentUser() currentUser: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    if (currentUser.id === id) {
-      return currentUser;
-    }
-    if (!currentUser.isAdmin()) {
+    if (!currentUser.isAgent()) {
       throw new ForbiddenException();
     }
     return this.usersService.findOneOrFail(org.id, id);
   }
 
   @Get()
-  @UseGuards(AuthGuard, RoleGuard)
-  @AllowRole('agent')
-  find(@Org() org: Organization, @Query() pagination: PaginationDto) {
-    return this.usersService.find(org.id, pagination);
+  @UseGuards(AuthGuard)
+  async find(
+    @Org() org: Organization,
+    @CurrentUser() currentUser: User,
+    @Query() params: FindUsersParams,
+  ) {
+    if (!currentUser.isAgent()) {
+      throw new ForbiddenException();
+    }
+    return {
+      users: await this.usersService.find(org.id, params),
+    };
   }
 }

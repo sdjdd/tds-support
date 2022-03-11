@@ -1,11 +1,21 @@
 import { Exclude, Expose } from 'class-transformer';
-import { Column, Entity } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import argon2 from 'argon2';
-import { BaseEntity } from '@/common/entities';
+import { UserRole } from '../types';
 
 @Entity('users')
 @Exclude()
-export class User extends BaseEntity {
+export class User {
+  @PrimaryGeneratedColumn()
+  @Expose()
+  id: number;
+
   @Column({ name: 'organization_id' })
   organizationId: number;
 
@@ -17,11 +27,20 @@ export class User extends BaseEntity {
   password: string;
 
   @Column()
+  @Expose()
   email: string;
 
   @Column()
   @Expose()
-  role: 'end-user' | 'agent' | 'admin';
+  role: UserRole;
+
+  @CreateDateColumn({ name: 'created_at' })
+  @Expose()
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  @Expose()
+  updatedAt: Date;
 
   async setPassword(password: string) {
     this.password = await argon2.hash(password);
