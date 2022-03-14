@@ -24,6 +24,7 @@ export class HttpBasicStrategy extends PassportStrategy(BasicStrategy) {
     );
 
     if (user && (await user.comparePassword(password))) {
+      delete user.password;
       return user;
     }
 
