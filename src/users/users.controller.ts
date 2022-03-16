@@ -23,8 +23,11 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post()
-  create(@Org() org: Organization, @Body() data: CreateUserDto) {
-    return this.usersService.create(org.id, data);
+  async create(@Org() org: Organization, @Body() data: CreateUserDto) {
+    const id = await this.usersService.create(org.id, data);
+    return {
+      user: await this.usersService.findOne(org.id, id),
+    };
   }
 
   @Patch(':id')
@@ -44,12 +47,9 @@ export class UsersController {
       }
     }
     await this.usersService.update(org.id, id, data);
-  }
-
-  @Get('me')
-  @UseGuards(AuthGuard)
-  findSelf(@CurrentUser() currentUser: User) {
-    return currentUser;
+    return {
+      user: await this.usersService.findOne(org.id, id),
+    };
   }
 
   @Get(':id')
@@ -59,8 +59,10 @@ export class UsersController {
     @CurrentUser() currentUser: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    if (!currentUser.isAgent()) {
-      throw new ForbiddenException();
+    if (id !== currentUser.id) {
+      if (!currentUser.isAgent()) {
+        throw new ForbiddenException();
+      }
     }
     return this.usersService.findOneOrFail(org.id, id);
   }

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import _ from 'lodash';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -105,7 +106,7 @@ export class UsersService {
     }
   }
 
-  async create(organizationId: number, data: CreateUserDto): Promise<User> {
+  async create(organizationId: number, data: CreateUserDto): Promise<number> {
     await this.assertNoUsernameConflict(organizationId, data.username);
     if (data.email) {
       await this.assertNoEmailConflict(organizationId, data.email);
@@ -117,11 +118,14 @@ export class UsersService {
     user.email = data.email;
     user.role = 'end-user';
     await this.usersRepository.insert(user);
-    return user;
+    return user.id;
   }
 
   async update(organizationId: number, id: number, data: UpdateUserDto) {
     const user = await this.findOneOrFail(organizationId, id);
+    if (_.isEmpty(data)) {
+      return;
+    }
     if (data.email && data.email !== user.email) {
       await this.assertNoEmailConflict(organizationId, data.email);
     }
