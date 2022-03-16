@@ -17,10 +17,6 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       stopAtFirstError: true,
-      transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
       whitelist: true,
     }),
   );

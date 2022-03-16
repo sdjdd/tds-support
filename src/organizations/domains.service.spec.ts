@@ -51,14 +51,13 @@ describe('DomainsService', () => {
   describe('create', () => {
     it('should insert domain', async () => {
       jest.spyOn(domainsRepository, 'findOne').mockResolvedValue(undefined);
-      const entity = await domainsService.create(1, {
+      await domainsService.create(1, {
         domain: 'some-domain',
       });
       expect(domainsRepository.insert).toBeCalledWith({
         organizationId: 1,
         domain: 'some-domain',
       });
-      expect(entity).toBeInstanceOf(Domain);
     });
 
     it('should throw when domain already exists', async () => {

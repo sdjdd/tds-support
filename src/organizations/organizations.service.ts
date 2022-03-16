@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import _ from 'lodash';
 import { CreateOrganizationDto } from './dtos/create-organization.dto';
 import { UpdateOrganizationDto } from './dtos/update-organization.dto';
 import { Organization } from './entities/organization.entity';
@@ -21,7 +22,7 @@ export class OrganizationsService {
     }
   }
 
-  async create(data: CreateOrganizationDto): Promise<Organization> {
+  async create(data: CreateOrganizationDto): Promise<number> {
     if (data.subdomain) {
       await this.assertNoSubdomainConflict(data.subdomain);
     }
@@ -32,15 +33,19 @@ export class OrganizationsService {
     organization.subdomain = data.subdomain;
 
     await this.organizationsRepository.insert(organization);
-    return organization;
+    return organization.id;
   }
 
   find(): Promise<Organization[]> {
     return this.organizationsRepository.find();
   }
 
+  findOne(id: number): Promise<Organization | undefined> {
+    return this.organizationsRepository.findOne(id);
+  }
+
   async findOneOrFail(id: number): Promise<Organization> {
-    const organization = await this.organizationsRepository.findOne(id);
+    const organization = await this.findOne(id);
     if (!organization) {
       throw new NotFoundException(`organization ${id} does not exist`);
     }
@@ -53,10 +58,10 @@ export class OrganizationsService {
 
   async update(id: number, data: UpdateOrganizationDto) {
     const organization = await this.findOneOrFail(id);
-    if (
-      data.subdomain !== undefined &&
-      organization.subdomain !== data.subdomain
-    ) {
+    if (_.isEmpty(data)) {
+      return;
+    }
+    if (data.subdomain && organization.subdomain !== data.subdomain) {
       await this.assertNoSubdomainConflict(data.subdomain);
     }
     await this.organizationsRepository.update(id, data);

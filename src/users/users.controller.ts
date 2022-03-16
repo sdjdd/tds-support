@@ -25,8 +25,9 @@ export class UsersController {
   @Post()
   async create(@Org() org: Organization, @Body() data: CreateUserDto) {
     const id = await this.usersService.create(org.id, data);
+    const user = await this.usersService.findOne(org.id, id);
     return {
-      user: await this.usersService.findOne(org.id, id),
+      user,
     };
   }
 
@@ -47,8 +48,9 @@ export class UsersController {
       }
     }
     await this.usersService.update(org.id, id, data);
+    const user = await this.usersService.findOne(org.id, id);
     return {
-      user: await this.usersService.findOne(org.id, id),
+      user,
     };
   }
 
@@ -77,8 +79,9 @@ export class UsersController {
     if (!currentUser.isAgent()) {
       throw new ForbiddenException();
     }
+    const users = await this.usersService.find(org.id, params);
     return {
-      users: await this.usersService.find(org.id, params),
+      users,
     };
   }
 }

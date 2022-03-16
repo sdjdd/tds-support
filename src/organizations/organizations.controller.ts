@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UseGuards,
@@ -27,45 +28,72 @@ export class OrganizationsController {
   ) {}
 
   @Post()
-  create(@Body() data: CreateOrganizationDto) {
-    return this.organizationsService.create(data);
+  async create(@Body() data: CreateOrganizationDto) {
+    const id = await this.organizationsService.create(data);
+    const organization = await this.organizationsService.findOne(id);
+    return {
+      organization,
+    };
   }
 
   @Get()
-  find() {
-    return this.organizationsService.find();
+  async find() {
+    const organizations = await this.organizationsService.find();
+    return {
+      organizations,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.organizationsService.findOneOrFail(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const organization = await this.organizationsService.findOneOrFail(id);
+    return {
+      organization,
+    };
   }
 
   @Patch(':id')
-  async update(@Param('id') id: number, @Body() data: UpdateOrganizationDto) {
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateOrganizationDto,
+  ) {
     await this.organizationsService.update(id, data);
+    const organization = await this.organizationsService.findOne(id);
+    return {
+      organization,
+    };
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number) {
+  async delete(@Param('id', ParseIntPipe) id: number) {
     await this.organizationsService.softDelete(id);
   }
 
-  @Post(':id/domains')
-  createDomain(@Param('id') id: number, @Body() data: CreateDomainDto) {
-    return this.domainsService.create(id, data);
-  }
-
-  @Get(':id/domains')
-  findDomains(@Param('id') id: number) {
-    return this.domainsService.find(id);
-  }
-
-  @Delete(':id/domains/:domainId')
-  async deleteDomain(
-    @Param('id') id: number,
-    @Param('domainId') domainId: number,
+  @Post(':orgId/domains')
+  async createDomain(
+    @Param('orgId') orgId: number,
+    @Body() data: CreateDomainDto,
   ) {
-    await this.domainsService.delete(id, domainId);
+    const id = await this.domainsService.create(orgId, data);
+    const domain = await this.domainsService.findOne(orgId, id);
+    return {
+      domain,
+    };
+  }
+
+  @Get(':orgId/domains')
+  async findDomains(@Param('orgId') orgId: number) {
+    const domains = await this.domainsService.find(orgId);
+    return {
+      domains,
+    };
+  }
+
+  @Delete(':orgId/domains/:id')
+  async deleteDomain(
+    @Param('orgId') orgId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    await this.domainsService.delete(orgId, id);
   }
 }
