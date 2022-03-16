@@ -17,10 +17,6 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       stopAtFirstError: true,
-      transformOptions: {
-        // 目前只有 page / pageSize 用到了，也许使用显示类型转换更好
-        enableImplicitConversion: true,
-      },
       whitelist: true,
     }),
   );

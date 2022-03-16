@@ -9,14 +9,7 @@ import _ from 'lodash';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { UserRole } from './types';
-
-interface FindUsersOptions {
-  take?: number;
-  skip?: number;
-  cursor?: number;
-  role?: UserRole | UserRole[];
-}
+import { FindUsersParams } from './dtos/find-users-params.dto';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +18,7 @@ export class UsersService {
 
   find(
     organizationId: number,
-    { skip, take, role, cursor }: FindUsersOptions = {},
+    { page, pageSize, role }: FindUsersParams,
   ): Promise<User[]> {
     const qb = this.usersRepository
       .createQueryBuilder('user')
@@ -39,15 +32,11 @@ export class UsersService {
       }
     }
 
-    if (skip) {
-      qb.skip(skip);
-    }
-
-    if (cursor) {
-      qb.andWhere('user.id > :cursor', { cursor });
-    }
-
-    return qb.take(take).orderBy('user.id').getMany();
+    return qb
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .orderBy('user.id')
+      .getMany();
   }
 
   findOne(organizationId: number, id: number): Promise<User | undefined> {

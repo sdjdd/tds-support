@@ -1,5 +1,5 @@
-import { Transform } from 'class-transformer';
 import { IsOptional, IsString, Length, Matches } from 'class-validator';
+import { ToLowerCase } from '@/common/transformers';
 
 export class CreateOrganizationDto {
   @Length(1, 255)
@@ -17,6 +17,6 @@ export class CreateOrganizationDto {
   })
   @IsString()
   @IsOptional()
-  @Transform(({ value }) => value.toLowerCase())
+  @ToLowerCase()
   subdomain?: string;
 }
