@@ -9,11 +9,11 @@ import { map } from 'rxjs/operators';
 import _ from 'lodash';
 
 function omitNull(data: any) {
-  if (typeof data === 'object') {
-    if (Array.isArray(data)) {
-      return data.map(omitNull);
-    }
-    return _.omitBy(data, _.isNull);
+  if (Array.isArray(data)) {
+    return data.map(omitNull);
+  }
+  if (_.isPlainObject(data)) {
+    return _.mapValues(_.omitBy(data, _.isNull), omitNull);
   }
   return data;
 }
