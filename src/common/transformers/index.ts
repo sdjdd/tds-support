@@ -8,3 +8,11 @@ export function Trim() {
     return value;
   });
 }
+
+export function ToLowerCase() {
+  return Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase();
+    }
+  });
+}
