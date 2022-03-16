@@ -32,7 +32,7 @@ describe('OrganizationsService', () => {
 
   describe('create', () => {
     it('should insert organization', async () => {
-      const organization = await organizationsService.create({
+      await organizationsService.create({
         name: 'org-name',
         description: 'org-desc',
         subdomain: 'support',
@@ -42,7 +42,6 @@ describe('OrganizationsService', () => {
         description: 'org-desc',
         subdomain: 'support',
       });
-      expect(organization).toBeInstanceOf(Organization);
     });
 
     it('should set default values', async () => {

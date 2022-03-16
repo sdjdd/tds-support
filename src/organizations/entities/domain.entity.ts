@@ -1,12 +1,10 @@
 import { Exclude, Expose } from 'class-transformer';
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
 
@@ -28,11 +26,11 @@ export class Domain {
   @Expose()
   domain: string;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @Column({ name: 'created_at' })
   @Expose()
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @Column({ name: 'updated_at' })
   @Expose()
   updatedAt: Date;
 }

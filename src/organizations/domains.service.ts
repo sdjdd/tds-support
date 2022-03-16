@@ -20,7 +20,7 @@ export class DomainsService {
     return this.domainsRepository.findOne({ domain });
   }
 
-  async create(organizationId: number, data: CreateDomainDto): Promise<Domain> {
+  async create(organizationId: number, data: CreateDomainDto): Promise<number> {
     await this.organizationsService.findOneOrFail(organizationId);
     let domain = await this.findOneByDomain(data.domain);
     if (domain) {
@@ -30,7 +30,7 @@ export class DomainsService {
     domain.organizationId = organizationId;
     domain.domain = data.domain;
     await this.domainsRepository.insert(domain);
-    return domain;
+    return domain.id;
   }
 
   async find(organizationId: number): Promise<Domain[]> {
@@ -38,18 +38,16 @@ export class DomainsService {
     return this.domainsRepository.find({ organizationId });
   }
 
-  async delete(organizationId: number, domainId: number) {
+  findOne(organizationId: number, id: number): Promise<Domain | undefined> {
+    return this.domainsRepository.findOne({ organizationId, id });
+  }
+
+  async delete(organizationId: number, id: number) {
     await this.organizationsService.findOneOrFail(organizationId);
-    const domain = await this.domainsRepository.findOne({
-      organizationId,
-      id: domainId,
-    });
+    const domain = await this.domainsRepository.findOne({ organizationId, id });
     if (!domain) {
-      throw new NotFoundException(`domain ${domainId} does not exist`);
+      throw new NotFoundException(`domain ${id} does not exist`);
     }
-    await this.domainsRepository.delete({
-      organizationId,
-      id: domainId,
-    });
+    await this.domainsRepository.delete({ organizationId, id });
   }
 }
