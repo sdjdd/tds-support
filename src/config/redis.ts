@@ -10,6 +10,10 @@ function parseRedisUrl(redisUrl: string) {
   };
 }
 
-export const cacheConfig = registerAs('cache', () =>
-  parseRedisUrl(process.env.REDIS_URL_CACHE),
-);
+export const cacheConfig = registerAs('cache', () => {
+  const url = process.env.REDIS_URL_CACHE;
+  return {
+    ...parseRedisUrl(url),
+    url,
+  };
+});
