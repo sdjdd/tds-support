@@ -50,16 +50,13 @@ export class CategoriesService {
 
     await this.connection.transaction(async (manager) => {
       if (category.parentId) {
-        const parent = await manager.findOne(
-          Category,
-          {
+        const parent = await manager.findOne(Category, {
+          where: {
             organizationId,
             id: category.parentId,
           },
-          {
-            lock: { mode: 'pessimistic_read' },
-          },
-        );
+          lock: { mode: 'pessimistic_read' },
+        });
         if (!parent) {
           throw new NotFoundException('parent category does not exist');
         }
