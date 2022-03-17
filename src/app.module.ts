@@ -8,6 +8,7 @@ import { CacheModule } from './cache';
 import { DatabaseModule } from './database';
 import { OrganizationsModule } from './organizations';
 import { UsersModule } from './users';
+import { CategoriesModule } from './categories';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UsersModule } from './users';
     AuthModule,
     OrganizationsModule,
     UsersModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
