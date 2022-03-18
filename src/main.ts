@@ -1,8 +1,4 @@
-import {
-  ClassSerializerInterceptor,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { ClassSerializerInterceptor, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ExcludeNullInterceptor } from '@/common';
 import { AppModule } from './app.module';
@@ -14,12 +10,6 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: '1',
   });
-  app.useGlobalPipes(
-    new ValidationPipe({
-      stopAtFirstError: true,
-      whitelist: true,
-    }),
-  );
   app.useGlobalInterceptors(
     new ExcludeNullInterceptor(),
     new ClassSerializerInterceptor(app.get(Reflector)),
