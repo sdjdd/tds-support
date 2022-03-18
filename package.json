@@ -23,6 +23,7 @@
     "migrate:create": "npm run typeorm migration:create -- --dir src/database/migrations -n"
   },
   "dependencies": {
+    "@anatine/zod-nestjs": "^1.3.1",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.2.0",
     "@nestjs/core": "^8.0.0",
@@ -37,6 +38,7 @@
     "ioredis": "^4.28.5",
     "lodash": "^4.17.21",
     "mysql2": "^2.3.3",
+    "openapi3-ts": "^2.0.2",
     "passport": "^0.5.2",
     "passport-http": "^0.3.0",
     "reflect-metadata": "^0.1.13",
