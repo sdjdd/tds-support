@@ -5,12 +5,12 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
-import _ from 'lodash';
 import { Connection, EntityManager, In, Repository } from 'typeorm';
-import { BatchUpdateCategoryDto } from './dtos/batch-update-category.dto';
+import _ from 'lodash';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { UpdateCategoryDto } from './dtos/update-category-dto';
 import { Category } from './entities/category.entity';
+import { BatchUpdateCategoryDto } from './dtos/batch-update-category.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -72,20 +72,15 @@ export class CategoriesService {
   }
 
   async update(organizationId: number, id: number, data: UpdateCategoryDto) {
-    if (_.isEmpty(data)) {
-      return;
-    }
-
-    if (data.parentId === id) {
-      throw new BadRequestException('invalid parentId');
-    }
-
-    await this.connection.transaction(async (manager) => {
-      await this.updateByEntityManager(manager, organizationId, id, data);
-    });
+    await this.connection.transaction((manager) =>
+      this.updateByEntityManager(manager, organizationId, id, data),
+    );
   }
 
-  async batchUpdate(organizationId: number, datas: BatchUpdateCategoryDto[]) {
+  async batchUpdate(
+    organizationId: number,
+    datas: BatchUpdateCategoryDto['categories'],
+  ) {
     if (datas.length === 0) {
       return;
     }
@@ -117,40 +112,49 @@ export class CategoriesService {
     if (_.isEmpty(data)) {
       return;
     }
-
     if (data.parentId === id) {
-      throw new BadRequestException('invalid parentId');
+      throw new BadRequestException('cannot set parentId to self');
     }
 
-    const category = await manager.findOne(Category, {
-      relations: ['parent'],
-      where: {
-        organizationId,
-        id,
-      },
-      lock: { mode: 'pessimistic_read' },
-    });
+    const findOne = (id: number) =>
+      manager.findOne(Category, {
+        where: { organizationId, id },
+        lock: { mode: 'pessimistic_read' },
+      });
 
+    const category = await findOne(id);
     if (!category) {
       throw new NotFoundException(`category ${id} does not exist`);
     }
 
-    if (data.active !== undefined && data.active !== category.active) {
-      if (data.active) {
-        if (category.parent?.active === false) {
-          throw new BadRequestException('parent category is inactive');
+    if (data.parentId !== null) {
+      const parentId = data.parentId ?? category.parentId;
+      if (parentId) {
+        const parent = await findOne(parentId);
+        if (!parent) {
+          throw new UnprocessableEntityException(
+            'parent category does not exist',
+          );
         }
-      } else {
-        const activeChild = await manager.findOne(Category, {
-          where: {
-            organizationId,
-            parentId: id,
-          },
-          lock: { mode: 'pessimistic_read' },
-        });
-        if (activeChild) {
-          throw new BadRequestException('some subcategories still active');
+        if (!parent.active && (data.active ?? category.active)) {
+          throw new BadRequestException(
+            'cannot make active category under an inactive parent',
+          );
         }
+      }
+    }
+
+    if (data.active === false && data.active !== category.active) {
+      const activeChild = await manager.findOne(Category, {
+        where: {
+          organizationId,
+          parentId: id,
+          active: true,
+        },
+        lock: { mode: 'pessimistic_read' },
+      });
+      if (activeChild) {
+        throw new BadRequestException('some subcategories still active');
       }
     }
 

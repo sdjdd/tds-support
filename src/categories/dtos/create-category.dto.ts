@@ -1,22 +1,10 @@
-import {
-  IsInt,
-  IsOptional,
-  IsString,
-  Length,
-  MaxLength,
-} from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from '@anatine/zod-nestjs';
 
-export class CreateCategoryDto {
-  @IsInt()
-  @IsOptional()
-  parentId?: number;
+export const CreateCategorySchema = z.object({
+  parentId: z.number().int().optional(),
+  name: z.string().max(20),
+  description: z.string().max(255).optional(),
+});
 
-  @Length(1, 20)
-  @IsString()
-  name: string;
-
-  @MaxLength(255)
-  @IsString()
-  @IsOptional()
-  description?: string;
-}
+export class CreateCategoryDto extends createZodDto(CreateCategorySchema) {}

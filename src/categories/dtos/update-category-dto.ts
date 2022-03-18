@@ -1,9 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { IsBoolean, IsOptional } from 'class-validator';
-import { CreateCategoryDto } from './create-category.dto';
+import { z } from 'zod';
+import { createZodDto } from '@anatine/zod-nestjs';
+import { CreateCategorySchema } from './create-category.dto';
 
-export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {
-  @IsBoolean()
-  @IsOptional()
-  active?: boolean;
-}
+export const UpdateCategorySchema = CreateCategorySchema.partial().extend({
+  parentId: CreateCategorySchema.shape.parentId.nullable(),
+  active: z.boolean().optional(),
+});
+
+export class UpdateCategoryDto extends createZodDto(UpdateCategorySchema) {}

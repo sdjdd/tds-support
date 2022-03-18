@@ -4,12 +4,13 @@ import {
   ForbiddenException,
   Get,
   Param,
-  ParseArrayPipe,
   ParseIntPipe,
   Patch,
   Post,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
+import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { Organization } from '@/organizations';
 import { User } from '@/users';
@@ -19,6 +20,7 @@ import { UpdateCategoryDto } from './dtos/update-category-dto';
 import { BatchUpdateCategoryDto } from './dtos/batch-update-category.dto';
 
 @Controller('categories')
+@UsePipes(ZodValidationPipe)
 export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
 
@@ -81,9 +83,11 @@ export class CategoriesController {
   async batchUpdate(
     @Org() org: Organization,
     @CurrentUser() user: User,
-    @Body(new ParseArrayPipe({ items: BatchUpdateCategoryDto }))
-    datas: BatchUpdateCategoryDto[],
+    @Body() { categories: datas }: BatchUpdateCategoryDto,
   ) {
+    if (!user.isAgent()) {
+      throw new ForbiddenException();
+    }
     if (datas.length === 0) {
       return { categories: [] };
     }
