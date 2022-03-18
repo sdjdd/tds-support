@@ -8,7 +8,9 @@ import {
   Patch,
   Post,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
+import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { MasterKeyGuard } from '@/common';
 import { CreateOrganizationDto } from './dtos/create-organization.dto';
 import { CreateDomainDto } from './dtos/create-domain.dto';
@@ -21,6 +23,7 @@ import { DomainsService } from './domains.service';
   path: 'organizations',
 })
 @UseGuards(MasterKeyGuard)
+@UsePipes(ZodValidationPipe)
 export class OrganizationsController {
   constructor(
     private organizationsService: OrganizationsService,

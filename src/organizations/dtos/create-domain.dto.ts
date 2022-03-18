@@ -1,11 +1,15 @@
-import { IsString, Matches } from 'class-validator';
-import { ToLowerCase } from '@/common/transformers';
+import { z } from 'zod';
+import { createZodDto } from '@anatine/zod-nestjs';
 
-export class CreateDomainDto {
-  @Matches(/^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*.)+[a-zA-Z]{2,}$/, {
-    message: 'invalid domain',
-  })
-  @IsString()
-  @ToLowerCase()
-  domain: string;
-}
+const DOMAIN_REGEX = /^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*.)+[a-zA-Z]{2,}$/;
+
+export const CreateDomainSchema = z.object({
+  domain: z
+    .string()
+    .regex(DOMAIN_REGEX, {
+      message: 'Invalid domain',
+    })
+    .transform((s) => s.toLowerCase()),
+});
+
+export class CreateDomainDto extends createZodDto(CreateDomainSchema) {}
