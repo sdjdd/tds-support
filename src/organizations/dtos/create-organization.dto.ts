@@ -1,22 +1,21 @@
-import { IsOptional, IsString, Length, Matches } from 'class-validator';
-import { ToLowerCase } from '@/common/transformers';
+import { z } from 'zod';
+import { createZodDto } from '@anatine/zod-nestjs';
 
-export class CreateOrganizationDto {
-  @Length(1, 255)
-  @IsString()
-  name: string;
+// link: https://stackoverflow.com/questions/7930751/regexp-for-subdomain
+const SUBDOMAIN_REGEX = /[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?/;
 
-  @Length(0, 255)
-  @IsString()
-  @IsOptional()
-  description?: string;
+export const CreateOrganizationSchema = z.object({
+  name: z.string().min(1).max(255),
+  description: z.string().max(255).optional(),
+  subdomain: z
+    .string()
+    .regex(SUBDOMAIN_REGEX, {
+      message: 'Invalid subdomain',
+    })
+    .transform((s) => s.toLowerCase())
+    .optional(),
+});
 
-  // https://stackoverflow.com/questions/7930751/regexp-for-subdomain
-  @Matches(/[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?/, {
-    message: 'invalid subdomain',
-  })
-  @IsString()
-  @IsOptional()
-  @ToLowerCase()
-  subdomain?: string;
-}
+export class CreateOrganizationDto extends createZodDto(
+  CreateOrganizationSchema,
+) {}

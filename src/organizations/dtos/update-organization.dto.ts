@@ -1,4 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateOrganizationDto } from './create-organization.dto';
+import { createZodDto } from '@anatine/zod-nestjs';
+import { CreateOrganizationSchema } from './create-organization.dto';
 
-export class UpdateOrganizationDto extends PartialType(CreateOrganizationDto) {}
+export const UpdateOrganizationSchema = CreateOrganizationSchema.partial();
+
+export class UpdateOrganizationDto extends createZodDto(
+  UpdateOrganizationSchema,
+) {}
