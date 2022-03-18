@@ -1,18 +1,10 @@
-import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
-import { Trim } from '@/common/transformers';
+import { z } from 'zod';
+import { createZodDto } from '@anatine/zod-nestjs';
 
-export class CreateUserDto {
-  @Length(1, 32)
-  @IsString()
-  @Trim()
-  username: string;
+export const CreateUserSchema = z.object({
+  username: z.string().min(1).max(50),
+  password: z.string().min(6).max(255),
+  email: z.string().email().optional(),
+});
 
-  @Length(6, 64)
-  @IsString()
-  password: string;
-
-  @IsEmail()
-  @IsString()
-  @IsOptional()
-  email?: string;
-}
+export class CreateUserDto extends createZodDto(CreateUserSchema) {}

@@ -9,7 +9,9 @@ import {
   Post,
   Query,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
+import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { Organization } from '@/organizations';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -19,6 +21,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { FindUsersParams } from './dtos/find-users-params.dto';
 
 @Controller('users')
+@UsePipes(ZodValidationPipe)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 

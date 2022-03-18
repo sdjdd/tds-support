@@ -1,11 +1,12 @@
-import { PickType } from '@nestjs/mapped-types';
-import { IsIn, IsOptional } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from '@anatine/zod-nestjs';
 import { USER_ROLES } from '../constants';
-import { UserRole } from '../types';
-import { CreateUserDto } from './create-user.dto';
+import { CreateUserSchema } from './create-user.dto';
 
-export class UpdateUserDto extends PickType(CreateUserDto, ['email']) {
-  @IsIn(USER_ROLES)
-  @IsOptional()
-  role?: UserRole;
-}
+export const UpdateUserSchema = CreateUserSchema.pick({
+  email: true,
+}).extend({
+  role: z.enum(USER_ROLES).optional(),
+});
+
+export class UpdateUserDto extends createZodDto(UpdateUserSchema) {}
