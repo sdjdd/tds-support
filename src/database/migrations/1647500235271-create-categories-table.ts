@@ -16,8 +16,6 @@ export class createCategoriesTable1647500235271 implements MigrationInterface {
         PRIMARY KEY (id),
         INDEX ix_categories_organization_id_id (organization_id,id),
         INDEX ix_categories_organization_id_parent_id (organization_id,parent_id),
-        CONSTRAINT fk_categories_organizations FOREIGN KEY (organization_id) REFERENCES organizations (id),
-        CONSTRAINT fk_categories_categories FOREIGN KEY (parent_id) REFERENCES categories (id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `);
   }
