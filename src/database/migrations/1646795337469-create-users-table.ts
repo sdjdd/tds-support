@@ -16,8 +16,7 @@ export class createUsersTable1646795337469 implements MigrationInterface {
         INDEX ix_users_organization_id_id (organization_id,id),
         INDEX ix_users_organization_id_role (organization_id,role),
         UNIQUE KEY uq_users_organization_id_username (organization_id,username),
-        UNIQUE KEY uq_users_organization_id_email (organization_id,email),
-        CONSTRAINT fk_users_organizations FOREIGN KEY (organization_id) REFERENCES organizations (id)
+        UNIQUE KEY uq_users_organization_id_email (organization_id,email)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `);
   }
