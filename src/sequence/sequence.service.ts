@@ -49,6 +49,10 @@ export class SequenceService {
         [organizationId, name],
       );
       if (row) {
+        await this.connection.query(
+          'UPDATE sequence SET next_id = next_id + 1 WHERE organization_id = ? AND name = ?',
+          [organizationId, name],
+        );
         return row.next_id;
       }
       await this.connection.query(
