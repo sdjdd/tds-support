@@ -13,26 +13,26 @@ export class SequenceService {
     return this.generateSequence(organizationId, table);
   }
 
-  private async tryToGetNextId(organizationId: number, table: string) {
+  private async tryToGetNextId(organizationId: number, name: string) {
     let nextId: number | undefined;
     await this.connection.transaction(async (manager) => {
       const [row] = await manager.query(
         'SELECT next_id from sequence where organization_id = ? AND name = ? LIMIT 1 FOR UPDATE',
-        [organizationId, table],
+        [organizationId, name],
       );
       if (row) {
         nextId = row.next_id;
         await manager.query(
           'UPDATE sequence SET next_id = next_id + 1 WHERE organization_id = ? AND name = ?',
-          [organizationId, table],
+          [organizationId, name],
         );
       }
     });
     return nextId;
   }
 
-  private async generateSequence(organizationId: number, table: string) {
-    const lockName = `tds_support_sequence:org${organizationId}:${table}`;
+  private async generateSequence(organizationId: number, name: string) {
+    const lockName = `tds_support_sequence:org${organizationId}:${name}`;
     const [result] = await this.connection.query(
       'SELECT GET_LOCK(?,10) as ok;',
       [lockName],
@@ -46,14 +46,14 @@ export class SequenceService {
     try {
       const [row] = await this.connection.query(
         'SELECT next_id from sequence where organization_id = ? AND name = ? LIMIT 1',
-        [organizationId, table],
+        [organizationId, name],
       );
       if (row) {
         return row.next_id;
       }
       await this.connection.query(
         'INSERT INTO sequence (organization_id,name,next_id) VALUES(?,?,?)',
-        [organizationId, table, 2],
+        [organizationId, name, 2],
       );
       return 1;
     } finally {
