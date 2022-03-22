@@ -1,67 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { Connection } from 'typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import { Redis } from 'ioredis';
+import { SEQUENCE_REDIS } from './constants';
 
 @Injectable()
 export class SequenceService {
-  constructor(private connection: Connection) {}
+  @Inject(SEQUENCE_REDIS)
+  private redis: Redis;
 
-  async getNextId(organizationId: number, name: string): Promise<number> {
-    const nextId = await this.tryToGetNextId(organizationId, name);
-    if (nextId) {
-      return nextId;
-    }
-    return this.createSequence(organizationId, name);
-  }
-
-  private async tryToGetNextId(organizationId: number, name: string) {
-    let nextId: number | undefined;
-    await this.connection.transaction(async (manager) => {
-      const [row] = await manager.query(
-        'SELECT next_id from sequence where organization_id = ? AND name = ? LIMIT 1 FOR UPDATE',
-        [organizationId, name],
-      );
-      if (row) {
-        nextId = row.next_id;
-        await manager.query(
-          'UPDATE sequence SET next_id = next_id + 1 WHERE organization_id = ? AND name = ?',
-          [organizationId, name],
-        );
-      }
-    });
-    return nextId;
-  }
-
-  private async createSequence(organizationId: number, name: string) {
-    const lockName = `tds_support_sequence:org${organizationId}:${name}`;
-    const [result] = await this.connection.query(
-      'SELECT GET_LOCK(?,10) as ok;',
-      [lockName],
-    );
-    if (result.ok === 0) {
-      throw new Error('create sequence timeout');
-    }
-    if (result.ok === null) {
-      throw new Error('create sequence failed');
-    }
-    try {
-      const [row] = await this.connection.query(
-        'SELECT next_id from sequence where organization_id = ? AND name = ? LIMIT 1',
-        [organizationId, name],
-      );
-      if (row) {
-        await this.connection.query(
-          'UPDATE sequence SET next_id = next_id + 1 WHERE organization_id = ? AND name = ?',
-          [organizationId, name],
-        );
-        return row.next_id;
-      }
-      await this.connection.query(
-        'INSERT INTO sequence (organization_id,name,next_id) VALUES(?,?,?)',
-        [organizationId, name, 2],
-      );
-      return 1;
-    } finally {
-      await this.connection.query('SELECT RELEASE_LOCK(?);', [lockName]);
-    }
+  getNextId(organizationId: number, name: string): Promise<number> {
+    const sequenceKey = `org:${organizationId}:seq:${name}`;
+    return this.redis.incr(sequenceKey);
   }
 }
