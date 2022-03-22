@@ -10,8 +10,7 @@ export class createDomainsTable1646622037126 implements MigrationInterface {
         created_at       datetime(3)       NOT NULL DEFAULT NOW(3),
         updated_at       datetime(3)       NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
         PRIMARY KEY (id),
-        UNIQUE KEY uq_domains_domain (domain),
-        CONSTRAINT fk_domains_organizations FOREIGN KEY (organization_id) REFERENCES organizations (id)
+        UNIQUE KEY uq_domains_domain (domain)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `);
   }
