@@ -7,6 +7,7 @@ import { default as config } from './ormconfig';
     TypeOrmModule.forRoot({
       ...config,
       autoLoadEntities: true,
+      logging: process.env.NODE_ENV !== 'production',
     }),
   ],
   exports: [TypeOrmModule],
