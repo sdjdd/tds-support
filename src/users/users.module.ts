@@ -1,5 +1,4 @@
-import { OrganizationMiddleware } from '@/common';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UsersController } from './users.controller';
@@ -11,8 +10,4 @@ import { UsersService } from './users.service';
   controllers: [UsersController],
   exports: [UsersService],
 })
-export class UsersModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(OrganizationMiddleware).forRoutes('*');
-  }
-}
+export class UsersModule {}

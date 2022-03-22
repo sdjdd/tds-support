@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { OrganizationMiddleware } from './common';
 import { cacheConfig, sequenceConfig } from './config/redis';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -28,4 +29,8 @@ import { SequenceModule } from './sequence';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(OrganizationMiddleware).forRoutes('*');
+  }
+}

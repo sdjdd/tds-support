@@ -10,21 +10,27 @@ declare module 'express' {
 
 @Injectable()
 export class OrganizationMiddleware implements NestMiddleware {
-  constructor(private organizationsService: OrganizationsService) {}
+  private adminDomain?: string;
+
+  constructor(private organizationsService: OrganizationsService) {
+    this.adminDomain = process.env.ADMIN_DOMAIN;
+  }
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { subdomains } = req;
-    if (subdomains.length === 0) {
-      throw new NotFoundException();
+    if (req.hostname !== this.adminDomain) {
+      const { subdomains } = req;
+      if (subdomains.length === 0) {
+        throw new NotFoundException();
+      }
+      const subdomain = subdomains[subdomains.length - 1];
+      const organization = await this.organizationsService.findOneBySubdomain(
+        subdomain,
+      );
+      if (!organization) {
+        throw new NotFoundException();
+      }
+      req.organization = organization;
     }
-    const subdomain = subdomains[subdomains.length - 1];
-    const organization = await this.organizationsService.findOneBySubdomain(
-      subdomain,
-    );
-    if (!organization) {
-      throw new NotFoundException();
-    }
-    req.organization = organization;
     next();
   }
 }
