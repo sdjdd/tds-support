@@ -15,7 +15,7 @@ export class createCategoriesTable1647500235271 implements MigrationInterface {
         updated_at      datetime(3)      NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
         PRIMARY KEY (id),
         INDEX ix_categories_organization_id_id (organization_id,id),
-        INDEX ix_categories_organization_id_parent_id (organization_id,parent_id),
+        INDEX ix_categories_organization_id_parent_id (organization_id,parent_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `);
   }
