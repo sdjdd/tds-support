@@ -5,12 +5,12 @@ import { Connection } from 'typeorm';
 export class SequenceService {
   constructor(private connection: Connection) {}
 
-  async getNextId(organizationId: number, table: string): Promise<number> {
-    const nextId = await this.tryToGetNextId(organizationId, table);
+  async getNextId(organizationId: number, name: string): Promise<number> {
+    const nextId = await this.tryToGetNextId(organizationId, name);
     if (nextId) {
       return nextId;
     }
-    return this.generateSequence(organizationId, table);
+    return this.createSequence(organizationId, name);
   }
 
   private async tryToGetNextId(organizationId: number, name: string) {
@@ -31,17 +31,17 @@ export class SequenceService {
     return nextId;
   }
 
-  private async generateSequence(organizationId: number, name: string) {
+  private async createSequence(organizationId: number, name: string) {
     const lockName = `tds_support_sequence:org${organizationId}:${name}`;
     const [result] = await this.connection.query(
       'SELECT GET_LOCK(?,10) as ok;',
       [lockName],
     );
     if (result.ok === 0) {
-      throw new Error('generate sequence timeout');
+      throw new Error('create sequence timeout');
     }
     if (result.ok === null) {
-      throw new Error('generate sequence failed');
+      throw new Error('create sequence failed');
     }
     try {
       const [row] = await this.connection.query(
