@@ -11,6 +11,7 @@ import { OrganizationsModule } from './organizations';
 import { UsersModule } from './users';
 import { CategoriesModule } from './categories';
 import { SequenceModule } from './sequence';
+import { TicketsModule } from './tickets';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SequenceModule } from './sequence';
     UsersModule,
     CategoriesModule,
     SequenceModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
