@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { cacheConfig } from './config/redis';
+import { cacheConfig, sequenceConfig } from './config/redis';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth';
@@ -9,12 +9,13 @@ import { DatabaseModule } from './database';
 import { OrganizationsModule } from './organizations';
 import { UsersModule } from './users';
 import { CategoriesModule } from './categories';
+import { SequenceModule } from './sequence';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [cacheConfig],
+      load: [cacheConfig, sequenceConfig],
     }),
     CacheModule,
     DatabaseModule,
@@ -22,6 +23,7 @@ import { CategoriesModule } from './categories';
     OrganizationsModule,
     UsersModule,
     CategoriesModule,
+    SequenceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
