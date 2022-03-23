@@ -121,7 +121,7 @@ export class TicketsService {
   }
 
   private getNextSeq(orgId: number) {
-    return this.sequenceService.getNext(orgId, 'ticketNid');
+    return this.sequenceService.getNext(orgId, 'ticket');
   }
 
   private async assertAssigneeIdIsValid(orgId: number, assigneeId: number) {
