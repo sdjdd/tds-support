@@ -17,8 +17,11 @@ export class createTicketsTable1647940961244 implements MigrationInterface {
         created_at      datetime(3)          NOT NULL DEFAULT NOW(3),
         updated_at      datetime(3)          NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
         PRIMARY KEY (id),
+        UNIQUE KEY uq_tickets_organization_id_nid (organization_id,nid),
         INDEX ix_tickets_organization_id_id (organization_id,id),
-        UNIQUE KEY uq_tickets_organization_id_nid (organization_id,nid)
+        INDEX ix_tickets_organization_id_status (organization_id,status),
+        INDEX ix_tickets_organization_id_created_at (organization_id,created_at),
+        INDEX ix_tickets_organization_id_updated_at (organization_id,updated_at)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `);
   }
