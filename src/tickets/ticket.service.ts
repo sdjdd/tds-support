@@ -14,6 +14,14 @@ import { Ticket } from './entities/ticket.entity';
 import { status } from './constants';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
 
+export interface FindTicketsOptions {
+  authorId?: number;
+  assigneeId?: number;
+  page?: number;
+  pageSize?: number;
+  orderBy?: ['nid' | 'status' | 'createdAt', 'ASC' | 'DESC'];
+}
+
 @Injectable()
 export class TicketsService {
   @InjectRepository(Ticket)
@@ -24,6 +32,42 @@ export class TicketsService {
     private categoriesService: CategoriesService,
     private usersService: UsersService,
   ) {}
+
+  async find(
+    organizationId: number,
+    {
+      authorId,
+      assigneeId,
+      page = 1,
+      pageSize = 100,
+      orderBy = ['nid', 'ASC'],
+    }: FindTicketsOptions,
+  ): Promise<Ticket[]> {
+    const qb = this.ticketsRepository.createQueryBuilder('ticket');
+    qb.select([
+      'ticket.nid',
+      'ticket.categoryId',
+      'ticket.authorId',
+      'ticket.assigneeId',
+      'ticket.title',
+      'ticket.status',
+      'ticket.replyCount',
+      'ticket.createdAt',
+      'ticket.updatedAt',
+    ]);
+    qb.where('ticket.organizationId = :organizationId', { organizationId });
+    if (authorId) {
+      qb.andWhere('ticket.authorId = :authorId', { authorId });
+    }
+    if (assigneeId) {
+      qb.andWhere('ticket.assigneeId = :assigneeId', { assigneeId });
+    }
+    qb.orderBy(...orderBy);
+    qb.skip((page - 1) * pageSize);
+    qb.take(pageSize);
+    const tickets = await qb.getMany();
+    return tickets;
+  }
 
   findOne(organizationId: number, id: number): Promise<Ticket | undefined> {
     return this.ticketsRepository.findOne({ organizationId, id });

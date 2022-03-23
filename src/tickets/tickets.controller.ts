@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
 import { Ticket } from './entities/ticket.entity';
 import { TicketsService } from './ticket.service';
+import { FindTicketsDto } from './dtos/find-tickets.dto';
 
 @Controller('tickets')
 @UseGuards(AuthGuard)
@@ -49,6 +51,21 @@ export class TicketsController {
     const ticket = await this.ticketsService.findOne(org.id, id);
     return {
       ticket,
+    };
+  }
+
+  @Get()
+  async find(
+    @Org() org: Organization,
+    @CurrentUser() user: User,
+    @Query() params: FindTicketsDto,
+  ) {
+    if (!user.isAgent()) {
+      throw new ForbiddenException();
+    }
+    const tickets = await this.ticketsService.find(org.id, params as any);
+    return {
+      tickets,
     };
   }
 
