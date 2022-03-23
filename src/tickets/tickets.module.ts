@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CaslModule } from '@/casl';
 import { CategoriesModule } from '@/categories';
@@ -14,9 +14,10 @@ import { TicketsController } from './tickets.controller';
     CaslModule,
     CategoriesModule,
     SequenceModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   providers: [TicketsService],
   controllers: [TicketsController],
+  exports: [TicketsService],
 })
 export class TicketsModule {}

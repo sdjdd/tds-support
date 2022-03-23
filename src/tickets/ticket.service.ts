@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
@@ -15,7 +17,7 @@ import { status } from './constants';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
 
 export interface FindTicketsOptions {
-  authorId?: number;
+  requesterId?: number;
   assigneeId?: number;
   page?: number;
   pageSize?: number;
@@ -27,16 +29,18 @@ export class TicketsService {
   @InjectRepository(Ticket)
   private ticketsRepository: Repository<Ticket>;
 
+  @Inject(forwardRef(() => UsersService))
+  private usersService: UsersService;
+
   constructor(
     private sequenceService: SequenceService,
     private categoriesService: CategoriesService,
-    private usersService: UsersService,
   ) {}
 
   async find(
     orgId: number,
     {
-      authorId,
+      requesterId,
       assigneeId,
       page = 1,
       pageSize = 100,
@@ -45,9 +49,9 @@ export class TicketsService {
   ): Promise<Ticket[]> {
     const qb = this.ticketsRepository.createQueryBuilder('ticket');
     qb.select([
-      'ticket.nid',
+      'ticket.seq',
       'ticket.categoryId',
-      'ticket.authorId',
+      'ticket.requesterId',
       'ticket.assigneeId',
       'ticket.title',
       'ticket.status',
@@ -56,14 +60,14 @@ export class TicketsService {
       'ticket.updatedAt',
     ]);
     qb.where('ticket.orgId = :orgId', { orgId });
-    if (authorId) {
-      qb.andWhere('ticket.authorId = :authorId', { authorId });
+    if (requesterId) {
+      qb.andWhere('ticket.requesterId = :requesterId', { requesterId });
     }
     if (assigneeId) {
       qb.andWhere('ticket.assigneeId = :assigneeId', { assigneeId });
     }
     if (orderBy) {
-      qb.orderBy(...orderBy);
+      qb.orderBy(`ticket.${orderBy[0]}`, orderBy[1]);
     }
     qb.skip((page - 1) * pageSize);
     qb.take(pageSize);
