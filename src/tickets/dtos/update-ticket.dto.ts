@@ -3,7 +3,7 @@ import { createZodDto } from '@anatine/zod-nestjs';
 import { CreateTicketSchema } from './create-ticket.dto';
 
 export const UpdateTicketSchema = CreateTicketSchema.omit({
-  authorId: true,
+  requesterId: true,
 })
   .partial()
   .extend({

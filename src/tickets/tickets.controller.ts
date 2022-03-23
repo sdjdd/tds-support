@@ -46,7 +46,7 @@ export class TicketsController {
         );
       }
     });
-    data.authorId ??= user.id;
+    data.requesterId ??= user.id;
     const id = await this.ticketsService.create(org.id, data);
     const ticket = await this.ticketsService.findOne(org.id, id);
     return {
@@ -69,13 +69,13 @@ export class TicketsController {
     };
   }
 
-  @Get(':nid')
+  @Get(':seq')
   async findOne(
     @Org() org: Organization,
     @CurrentUser() user: User,
-    @Param('nid', ParseIntPipe) nid: number,
+    @Param('seq', ParseIntPipe) seq: number,
   ) {
-    const ticket = await this.ticketsService.findOneByNidOrFail(org.id, nid);
+    const ticket = await this.ticketsService.findOneBySeqOrFail(org.id, seq);
     const ability = this.caslAbilityFactory.createForUser(user);
     if (ability.cannot('read', ticket)) {
       throw new ForbiddenException();
@@ -85,14 +85,14 @@ export class TicketsController {
     };
   }
 
-  @Patch(':nid')
+  @Patch(':seq')
   async update(
     @Org() org: Organization,
     @CurrentUser() user: User,
-    @Param('nid', ParseIntPipe) nid: number,
+    @Param('seq', ParseIntPipe) seq: number,
     @Body() data: UpdateTicketDto,
   ) {
-    let ticket = await this.ticketsService.findOneByNidOrFail(org.id, nid);
+    let ticket = await this.ticketsService.findOneBySeqOrFail(org.id, seq);
     const ability = this.caslAbilityFactory.createForUser(user);
     if (ability.cannot('update', ticket)) {
       throw new ForbiddenException();
@@ -105,7 +105,7 @@ export class TicketsController {
       }
     });
     if (!_.isEmpty(data)) {
-      await this.ticketsService.update(org.id, nid, data);
+      await this.ticketsService.update(org.id, seq, data);
       ticket = await this.ticketsService.findOne(org.id, ticket.id);
     }
     return {

@@ -13,7 +13,7 @@ export const FindTicketsSchema = PaginationSchema.extend({
         field = field.slice(1);
       }
       if (field === 'id') {
-        field = 'nid';
+        field = 'seq';
       }
       return [field, desc ? 'DESC' : 'ASC'];
     })

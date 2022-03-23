@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createZodDto } from '@anatine/zod-nestjs';
 
 export const CreateTicketSchema = z.object({
-  authorId: z.number().optional(),
+  requesterId: z.number().optional(),
   categoryId: z.number(),
   title: z.string(),
   content: z.string(),

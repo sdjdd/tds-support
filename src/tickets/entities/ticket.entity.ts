@@ -7,20 +7,20 @@ export class Ticket {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'organization_id' })
-  organizationId: number;
+  @Column({ name: 'org_id' })
+  orgId: number;
 
   @Column()
   @Expose({ name: 'id' })
-  nid: number;
+  seq: number;
 
   @Column({ name: 'category_id' })
   @Expose()
   categoryId: number;
 
-  @Column({ name: 'author_id' })
+  @Column({ name: 'requester_id' })
   @Expose()
-  authorId: number;
+  requesterId: number;
 
   @Column({ name: 'assignee_id' })
   @Expose()

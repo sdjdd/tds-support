@@ -23,8 +23,8 @@ export class CaslAbilityFactory {
       can('manage', 'all');
     } else {
       can('create', Ticket, ['categoryId', 'title', 'content']);
-      can('read', Ticket, { authorId: user.id });
-      can('update', Ticket, ['title', 'content'], { authorId: user.id });
+      can('read', Ticket, { requesterId: user.id });
+      can('update', Ticket, ['title', 'content'], { requesterId: user.id });
     }
 
     return build({

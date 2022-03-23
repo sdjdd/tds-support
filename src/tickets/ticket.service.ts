@@ -19,7 +19,7 @@ export interface FindTicketsOptions {
   assigneeId?: number;
   page?: number;
   pageSize?: number;
-  orderBy?: ['nid' | 'status' | 'createdAt', 'ASC' | 'DESC'];
+  orderBy?: ['seq' | 'status' | 'createdAt', 'ASC' | 'DESC'];
 }
 
 @Injectable()
@@ -34,13 +34,13 @@ export class TicketsService {
   ) {}
 
   async find(
-    organizationId: number,
+    orgId: number,
     {
       authorId,
       assigneeId,
       page = 1,
       pageSize = 100,
-      orderBy = ['nid', 'ASC'],
+      orderBy,
     }: FindTicketsOptions,
   ): Promise<Ticket[]> {
     const qb = this.ticketsRepository.createQueryBuilder('ticket');
@@ -55,50 +55,46 @@ export class TicketsService {
       'ticket.createdAt',
       'ticket.updatedAt',
     ]);
-    qb.where('ticket.organizationId = :organizationId', { organizationId });
+    qb.where('ticket.orgId = :orgId', { orgId });
     if (authorId) {
       qb.andWhere('ticket.authorId = :authorId', { authorId });
     }
     if (assigneeId) {
       qb.andWhere('ticket.assigneeId = :assigneeId', { assigneeId });
     }
-    qb.orderBy(...orderBy);
+    if (orderBy) {
+      qb.orderBy(...orderBy);
+    }
     qb.skip((page - 1) * pageSize);
     qb.take(pageSize);
     const tickets = await qb.getMany();
     return tickets;
   }
 
-  findOne(organizationId: number, id: number): Promise<Ticket | undefined> {
-    return this.ticketsRepository.findOne({ organizationId, id });
+  findOne(orgId: number, id: number): Promise<Ticket | undefined> {
+    return this.ticketsRepository.findOne({ orgId, id });
   }
 
-  findOneByNid(
-    organizationId: number,
-    nid: number,
-  ): Promise<Ticket | undefined> {
-    return this.ticketsRepository.findOne({ organizationId, nid });
+  findOneBySeq(orgId: number, seq: number): Promise<Ticket | undefined> {
+    return this.ticketsRepository.findOne({ orgId, seq });
   }
 
-  async findOneByNidOrFail(
-    organizationId: number,
-    nid: number,
-  ): Promise<Ticket> {
-    const ticket = await this.findOneByNid(organizationId, nid);
+  async findOneBySeqOrFail(orgId: number, seq: number): Promise<Ticket> {
+    const ticket = await this.findOneBySeq(orgId, seq);
     if (!ticket) {
-      throw new NotFoundException(`ticket ${nid} does not exist`);
+      throw new NotFoundException(`ticket ${seq} does not exist`);
     }
     return ticket;
   }
 
-  async create(organizationId: number, data: CreateTicketDto): Promise<number> {
-    await this.categoriesService.findOneOrFail(organizationId, data.categoryId);
-    await this.usersService.findOneOrFail(organizationId, data.authorId);
+  async create(orgId: number, data: CreateTicketDto): Promise<number> {
+    await this.categoriesService.findOneOrFail(orgId, data.categoryId);
+    await this.usersService.findOneOrFail(orgId, data.requesterId);
     const ticket = new Ticket();
-    ticket.organizationId = organizationId;
-    ticket.nid = await this.getNextNid(organizationId);
+    ticket.orgId = orgId;
+    ticket.seq = await this.getNextSeq(orgId);
     ticket.status = status.new;
-    ticket.authorId = data.authorId;
+    ticket.requesterId = data.requesterId;
     ticket.categoryId = data.categoryId;
     ticket.title = data.title;
     ticket.content = data.content;
@@ -107,34 +103,25 @@ export class TicketsService {
     return ticket.id;
   }
 
-  async update(organizationId: number, nid: number, data: UpdateTicketDto) {
+  async update(orgId: number, seq: number, data: UpdateTicketDto) {
     if (_.isEmpty(data)) {
       return;
     }
     if (data.categoryId) {
-      await this.categoriesService.findOneOrFail(
-        organizationId,
-        data.categoryId,
-      );
+      await this.categoriesService.findOneOrFail(orgId, data.categoryId);
     }
     if (data.assigneeId) {
-      await this.assertAssigneeIdIsValid(organizationId, data.assigneeId);
+      await this.assertAssigneeIdIsValid(orgId, data.assigneeId);
     }
-    await this.ticketsRepository.update({ organizationId, nid }, data);
+    await this.ticketsRepository.update({ orgId, seq }, data);
   }
 
-  private getNextNid(organizationId: number) {
-    return this.sequenceService.getNextId(organizationId, 'ticketNid');
+  private getNextSeq(orgId: number) {
+    return this.sequenceService.getNext(orgId, 'ticketNid');
   }
 
-  private async assertAssigneeIdIsValid(
-    organizationId: number,
-    assigneeId: number,
-  ) {
-    const user = await this.usersService.findOneOrFail(
-      organizationId,
-      assigneeId,
-    );
+  private async assertAssigneeIdIsValid(orgId: number, assigneeId: number) {
+    const user = await this.usersService.findOneOrFail(orgId, assigneeId);
     if (!user.isAgent()) {
       throw new UnprocessableEntityException(`user ${assigneeId} is not agent`);
     }
