@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import _ from 'lodash';
@@ -45,6 +49,7 @@ export class TicketsService {
 
   async create(organizationId: number, data: CreateTicketDto): Promise<number> {
     await this.categoriesService.findOneOrFail(organizationId, data.categoryId);
+    await this.usersService.findOneOrFail(organizationId, data.authorId);
     const ticket = new Ticket();
     ticket.organizationId = organizationId;
     ticket.nid = await this.getNextNid(organizationId);
@@ -69,12 +74,25 @@ export class TicketsService {
       );
     }
     if (data.assigneeId) {
-      await this.usersService.findOneOrFail(organizationId, data.assigneeId);
+      await this.assertAssigneeIdIsValid(organizationId, data.assigneeId);
     }
     await this.ticketsRepository.update({ organizationId, nid }, data);
   }
 
   private getNextNid(organizationId: number) {
     return this.sequenceService.getNextId(organizationId, 'ticketNid');
+  }
+
+  private async assertAssigneeIdIsValid(
+    organizationId: number,
+    assigneeId: number,
+  ) {
+    const user = await this.usersService.findOneOrFail(
+      organizationId,
+      assigneeId,
+    );
+    if (!user.isAgent()) {
+      throw new UnprocessableEntityException(`user ${assigneeId} is not agent`);
+    }
   }
 }

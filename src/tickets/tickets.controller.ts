@@ -13,17 +13,22 @@ import {
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import _ from 'lodash';
 import { AuthGuard, CurrentUser, Org } from '@/common';
+import { CaslAbilityFactory } from '@/casl';
 import { Organization } from '@/organizations';
 import { User } from '@/users';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
-import { TicketsService } from './ticket.service';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
+import { Ticket } from './entities/ticket.entity';
+import { TicketsService } from './ticket.service';
 
 @Controller('tickets')
 @UseGuards(AuthGuard)
 @UsePipes(ZodValidationPipe)
 export class TicketsController {
-  constructor(private ticketsService: TicketsService) {}
+  constructor(
+    private caslAbilityFactory: CaslAbilityFactory,
+    private ticketsService: TicketsService,
+  ) {}
 
   @Post()
   async create(
@@ -31,9 +36,15 @@ export class TicketsController {
     @CurrentUser() user: User,
     @Body() data: CreateTicketDto,
   ) {
-    if (data.authorId === undefined || !user.isAgent()) {
-      data.authorId = user.id;
-    }
+    const ability = this.caslAbilityFactory.createForUser(user);
+    Object.keys(data).forEach((field) => {
+      if (ability.cannot('create', Ticket, field)) {
+        throw new ForbiddenException(
+          `you don't have permission to create ticket with ${field}`,
+        );
+      }
+    });
+    data.authorId ??= user.id;
     const id = await this.ticketsService.create(org.id, data);
     const ticket = await this.ticketsService.findOne(org.id, id);
     return {
@@ -48,7 +59,8 @@ export class TicketsController {
     @Param('nid', ParseIntPipe) nid: number,
   ) {
     const ticket = await this.ticketsService.findOneByNidOrFail(org.id, nid);
-    if (!user.isAgent() && user.id !== ticket.authorId) {
+    const ability = this.caslAbilityFactory.createForUser(user);
+    if (ability.cannot('read', ticket)) {
       throw new ForbiddenException();
     }
     return {
@@ -64,14 +76,17 @@ export class TicketsController {
     @Body() data: UpdateTicketDto,
   ) {
     let ticket = await this.ticketsService.findOneByNidOrFail(org.id, nid);
-    if (!user.isAgent()) {
-      if (user.id !== ticket.authorId) {
-        throw new ForbiddenException();
-      }
-      if (data.assigneeId) {
-        throw new ForbiddenException();
-      }
+    const ability = this.caslAbilityFactory.createForUser(user);
+    if (ability.cannot('update', ticket)) {
+      throw new ForbiddenException();
     }
+    Object.keys(data).forEach((field) => {
+      if (ability.cannot('update', ticket, field)) {
+        throw new ForbiddenException(
+          `you don't have permission to update ticket ${field}`,
+        );
+      }
+    });
     if (!_.isEmpty(data)) {
       await this.ticketsService.update(org.id, nid, data);
       ticket = await this.ticketsService.findOne(org.id, ticket.id);

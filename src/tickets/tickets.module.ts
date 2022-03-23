@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CaslModule } from '@/casl';
 import { CategoriesModule } from '@/categories';
 import { SequenceModule } from '@/sequence';
 import { UsersModule } from '@/users';
@@ -10,6 +11,7 @@ import { TicketsController } from './tickets.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Ticket]),
+    CaslModule,
     CategoriesModule,
     SequenceModule,
     UsersModule,
