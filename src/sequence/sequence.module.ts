@@ -1,4 +1,4 @@
-import { FactoryProvider, Global, Module } from '@nestjs/common';
+import { FactoryProvider, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { SEQUENCE_REDIS } from './constants';
@@ -12,7 +12,6 @@ const redisFactory: FactoryProvider = {
   },
 };
 
-@Global()
 @Module({
   providers: [redisFactory, SequenceService],
   exports: [SequenceService],

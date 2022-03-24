@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   ForbiddenException,
+  forwardRef,
   Get,
+  Inject,
   Param,
   ParseIntPipe,
   Patch,
@@ -14,6 +16,8 @@ import {
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { Organization } from '@/organizations';
+import { TicketsService } from '@/tickets';
+import { FindTicketsDto } from '@/tickets/dtos/find-tickets.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
@@ -23,6 +27,9 @@ import { FindUsersParams } from './dtos/find-users-params.dto';
 @Controller('users')
 @UsePipes(ZodValidationPipe)
 export class UsersController {
+  @Inject(forwardRef(() => TicketsService))
+  private ticketsService: TicketsService;
+
   constructor(private usersService: UsersService) {}
 
   @Post()
@@ -70,6 +77,52 @@ export class UsersController {
       }
     }
     return this.usersService.findOneOrFail(org.id, id);
+  }
+
+  @Get(':id/tickets/requested')
+  @UseGuards(AuthGuard)
+  async findRequestedTickets(
+    @Org() org: Organization,
+    @CurrentUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Query() params: FindTicketsDto,
+  ) {
+    if (id !== user.id) {
+      if (!user.isAgent()) {
+        throw new ForbiddenException();
+      }
+      await this.usersService.findOneOrFail(org.id, id);
+    }
+    const tickets = await this.ticketsService.find(org.id, {
+      ...(params as any),
+      requesterId: id,
+    });
+    return {
+      tickets,
+    };
+  }
+
+  @Get(':id/tickets/assigned')
+  @UseGuards(AuthGuard)
+  async findAssignedTickets(
+    @Org() org: Organization,
+    @CurrentUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Query() params: FindTicketsDto,
+  ) {
+    if (!user.isAgent()) {
+      throw new ForbiddenException();
+    }
+    if (id !== user.id) {
+      await this.usersService.findOneOrFail(org.id, id);
+    }
+    const tickets = await this.ticketsService.find(org.id, {
+      ...(params as any),
+      assigneeId: id,
+    });
+    return {
+      tickets,
+    };
   }
 
   @Get()
