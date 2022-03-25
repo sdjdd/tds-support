@@ -10,8 +10,8 @@ export class User {
   @Expose()
   id: number;
 
-  @Column({ name: 'organization_id' })
-  organizationId: number;
+  @Column({ name: 'org_id' })
+  orgId: number;
 
   @Column()
   @Expose()

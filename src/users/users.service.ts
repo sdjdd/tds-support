@@ -17,12 +17,12 @@ export class UsersService {
   private usersRepository: Repository<User>;
 
   find(
-    organizationId: number,
+    orgId: number,
     { page, pageSize, role }: FindUsersParams,
   ): Promise<User[]> {
     const qb = this.usersRepository
       .createQueryBuilder('user')
-      .where('user.organizationId = :organizationId', { organizationId });
+      .where('user.orgId = :orgId', { orgId });
 
     if (role) {
       if (Array.isArray(role)) {
@@ -39,12 +39,12 @@ export class UsersService {
       .getMany();
   }
 
-  findOne(organizationId: number, id: number): Promise<User | undefined> {
-    return this.usersRepository.findOne({ organizationId, id });
+  findOne(orgId: number, id: number): Promise<User | undefined> {
+    return this.usersRepository.findOne({ orgId, id });
   }
 
-  async findOneOrFail(organizationId: number, id: number): Promise<User> {
-    const user = await this.findOne(organizationId, id);
+  async findOneOrFail(orgId: number, id: number): Promise<User> {
+    const user = await this.findOne(orgId, id);
     if (!user) {
       throw new NotFoundException(`user ${id} does not exist`);
     }
@@ -52,56 +52,49 @@ export class UsersService {
   }
 
   findOneByUsername(
-    organizationId: number,
+    orgId: number,
     username: string,
   ): Promise<User | undefined> {
-    return this.usersRepository.findOne({ organizationId, username });
+    return this.usersRepository.findOne({ orgId, username });
   }
 
-  findOneByEmail(
-    organizationId: number,
-    email: string,
-  ): Promise<User | undefined> {
-    return this.usersRepository.findOne({ organizationId, email });
+  findOneByEmail(orgId: number, email: string): Promise<User | undefined> {
+    return this.usersRepository.findOne({ orgId, email });
   }
 
   findOneByUsernameAndSelectPassword(
-    organizationId: number,
+    orgId: number,
     username: string,
   ): Promise<User | undefined> {
     return this.usersRepository
       .createQueryBuilder('user')
       .addSelect('user.password')
-      .where('user.organization_id = :organizationId')
-      .andWhere('user.username = :username')
-      .setParameters({ organizationId, username })
+      .where('user.orgId = :orgId', { orgId })
+      .andWhere('user.username = :username', { username })
       .getOne();
   }
 
-  private async assertNoUsernameConflict(
-    organizationId: number,
-    username: string,
-  ) {
-    const user = await this.findOneByUsername(organizationId, username);
+  private async assertNoUsernameConflict(orgId: number, username: string) {
+    const user = await this.findOneByUsername(orgId, username);
     if (user) {
       throw new ConflictException(`username "${username}" already exists`);
     }
   }
 
-  private async assertNoEmailConflict(organizationId: number, email: string) {
-    const user = await this.findOneByEmail(organizationId, email);
+  private async assertNoEmailConflict(orgId: number, email: string) {
+    const user = await this.findOneByEmail(orgId, email);
     if (user) {
       throw new ConflictException(`email "${email}" already exists`);
     }
   }
 
-  async create(organizationId: number, data: CreateUserDto): Promise<number> {
-    await this.assertNoUsernameConflict(organizationId, data.username);
+  async create(orgId: number, data: CreateUserDto): Promise<number> {
+    await this.assertNoUsernameConflict(orgId, data.username);
     if (data.email) {
-      await this.assertNoEmailConflict(organizationId, data.email);
+      await this.assertNoEmailConflict(orgId, data.email);
     }
     const user = new User();
-    user.organizationId = organizationId;
+    user.orgId = orgId;
     user.username = data.username;
     await user.setPassword(data.password);
     user.email = data.email;
@@ -110,14 +103,14 @@ export class UsersService {
     return user.id;
   }
 
-  async update(organizationId: number, id: number, data: UpdateUserDto) {
-    const user = await this.findOneOrFail(organizationId, id);
+  async update(orgId: number, id: number, data: UpdateUserDto) {
+    const user = await this.findOneOrFail(orgId, id);
     if (_.isEmpty(data)) {
       return;
     }
     if (data.email && data.email !== user.email) {
-      await this.assertNoEmailConflict(organizationId, data.email);
+      await this.assertNoEmailConflict(orgId, data.email);
     }
-    await this.usersRepository.update({ organizationId, id }, data);
+    await this.usersRepository.update({ orgId, id }, data);
   }
 }
