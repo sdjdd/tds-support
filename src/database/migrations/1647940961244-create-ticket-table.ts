@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class createTicketsTable1647940961244 implements MigrationInterface {
+export class createTicketTable1647940961244 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TABLE tickets (
+      CREATE TABLE ticket (
         id           int(11) unsigned     NOT NULL AUTO_INCREMENT,
         org_id       int(11) unsigned     NOT NULL,
         seq          int(11) unsigned     NOT NULL,

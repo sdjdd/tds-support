@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity('categories')
+@Entity('category')
 @Exclude()
 export class Category {
   @PrimaryGeneratedColumn()

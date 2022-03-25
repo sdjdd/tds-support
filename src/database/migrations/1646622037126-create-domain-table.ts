@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class createDomainsTable1646622037126 implements MigrationInterface {
+export class createDomainTable1646622037126 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TABLE domains (
+      CREATE TABLE domain (
         id               int(11) unsigned  NOT NULL AUTO_INCREMENT,
         organization_id  int(11) unsigned  NOT NULL,
         domain           varchar(255)      NOT NULL,

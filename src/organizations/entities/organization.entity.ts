@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Domain } from './domain.entity';
 
-@Entity('organizations')
+@Entity('organization')
 export class Organization {
   @PrimaryGeneratedColumn()
   id: number;

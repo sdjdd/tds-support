@@ -1,11 +1,11 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class createOrganizationsTable1646372053798
+export class createOrganizationTable1646372053798
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TABLE organizations (
+      CREATE TABLE organization (
         id          int(11) unsigned NOT NULL AUTO_INCREMENT,
         name        varchar(255)     NOT NULL,
         description varchar(255)     NOT NULL DEFAULT '',

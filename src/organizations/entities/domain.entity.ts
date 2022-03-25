@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Organization } from './organization.entity';
 
-@Entity('domains')
+@Entity('domain')
 @Exclude()
 export class Domain {
   @PrimaryGeneratedColumn()
