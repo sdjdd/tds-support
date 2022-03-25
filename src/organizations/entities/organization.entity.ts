@@ -21,7 +21,7 @@ export class Organization {
   @Column()
   subdomain: string;
 
-  @OneToMany(() => Domain, (domain) => domain.organization)
+  @OneToMany(() => Domain, (domain) => domain.org)
   domains: Domain[];
 
   @Column({ name: 'created_at' })

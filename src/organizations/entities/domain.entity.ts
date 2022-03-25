@@ -15,12 +15,12 @@ export class Domain {
   @Expose()
   id: number;
 
-  @Column({ name: 'organization_id' })
-  organizationId: number;
+  @Column({ name: 'org_id' })
+  orgId: number;
 
-  @ManyToOne(() => Organization, (organization) => organization.domains)
-  @JoinColumn({ name: 'organization_id' })
-  organization: Organization;
+  @ManyToOne(() => Organization, (org) => org.domains)
+  @JoinColumn({ name: 'org_id' })
+  org: Organization;
 
   @Column()
   @Expose()
