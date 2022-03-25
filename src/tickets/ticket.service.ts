@@ -96,7 +96,7 @@ export class TicketsService {
     await this.usersService.findOneOrFail(orgId, data.requesterId);
     const ticket = new Ticket();
     ticket.orgId = orgId;
-    ticket.seq = await this.getNextSeq(orgId);
+    ticket.seq = await this.getNextSequence(orgId);
     ticket.status = status.new;
     ticket.requesterId = data.requesterId;
     ticket.categoryId = data.categoryId;
@@ -120,7 +120,7 @@ export class TicketsService {
     await this.ticketsRepository.update({ orgId, seq }, data);
   }
 
-  private getNextSeq(orgId: number) {
+  private getNextSequence(orgId: number) {
     return this.sequenceService.getNext(orgId, 'ticket');
   }
 
