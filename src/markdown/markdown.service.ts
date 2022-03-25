@@ -19,7 +19,7 @@ export class MarkdownService {
           } catch {}
         }
         try {
-          return hljs.highlightAuto(lang).value;
+          return hljs.highlightAuto(code).value;
         } catch {
           return '';
         }
