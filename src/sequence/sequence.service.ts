@@ -7,8 +7,8 @@ export class SequenceService {
   @Inject(SEQUENCE_REDIS)
   private redis: Redis;
 
-  getNext(organizationId: number, name: string): Promise<number> {
-    const sequenceKey = `org:${organizationId}:seq:${name}`;
+  getNext(orgId: number, name: string): Promise<number> {
+    const sequenceKey = `org:${orgId}:seq:${name}`;
     return this.redis.incr(sequenceKey);
   }
 }

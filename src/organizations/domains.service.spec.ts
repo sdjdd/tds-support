@@ -55,7 +55,7 @@ describe('DomainsService', () => {
         domain: 'some-domain',
       });
       expect(domainsRepository.insert).toBeCalledWith({
-        organizationId: 1,
+        orgId: 1,
         domain: 'some-domain',
       });
     });
@@ -73,7 +73,7 @@ describe('DomainsService', () => {
   describe('find', () => {
     it('should find domains for organization', async () => {
       await domainsService.find(1);
-      expect(domainsRepository.find).toBeCalledWith({ organizationId: 1 });
+      expect(domainsRepository.find).toBeCalledWith({ orgId: 1 });
     });
 
     it('should throw NotFoundException when organization not exists', async () => {
@@ -89,7 +89,7 @@ describe('DomainsService', () => {
       jest.spyOn(domainsRepository, 'findOne').mockResolvedValue(new Domain());
       await domainsService.delete(1, 1);
       expect(domainsRepository.delete).toBeCalledWith({
-        organizationId: 1,
+        orgId: 1,
         id: 1,
       });
     });
