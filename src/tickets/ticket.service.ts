@@ -33,8 +33,8 @@ export class TicketsService {
   private usersService: UsersService;
 
   constructor(
-    private sequenceService: SequenceService,
     private categoriesService: CategoriesService,
+    private sequenceService: SequenceService,
   ) {}
 
   async find(
