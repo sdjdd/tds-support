@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Domain } from './domain.entity';
 
-@Entity('organizations')
+@Entity('organization')
 export class Organization {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,7 +21,7 @@ export class Organization {
   @Column()
   subdomain: string;
 
-  @OneToMany(() => Domain, (domain) => domain.organization)
+  @OneToMany(() => Domain, (domain) => domain.org)
   domains: Domain[];
 
   @Column({ name: 'created_at' })

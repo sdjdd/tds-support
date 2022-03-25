@@ -8,15 +8,15 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity('categories')
+@Entity('category')
 @Exclude()
 export class Category {
   @PrimaryGeneratedColumn()
   @Expose()
   id: number;
 
-  @Column({ name: 'organization_id' })
-  organizationId: number;
+  @Column({ name: 'org_id' })
+  orgId: number;
 
   @Column({ name: 'parent_id' })
   @Expose()
