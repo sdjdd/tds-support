@@ -17,17 +17,17 @@ export class createTicketTable1647940961244 implements MigrationInterface {
         created_at   datetime(3)          NOT NULL DEFAULT NOW(3),
         updated_at   datetime(3)          NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
         PRIMARY KEY (id),
-        UNIQUE KEY uq_tickets_org_id_seq (org_id,seq),
-        INDEX ix_tickets_org_id_id (org_id,id),
-        INDEX ix_tickets_org_id_requester_id (org_id,requester_id),
-        INDEX ix_tickets_org_id_assignee_id (org_id,assignee_id),
-        INDEX ix_tickets_org_id_status (org_id,status),
-        INDEX ix_tickets_org_id_updated_at (org_id,updated_at)
+        UNIQUE KEY uq_ticket_org_id_seq (org_id,seq),
+        INDEX ix_ticket_org_id_id (org_id,id),
+        INDEX ix_ticket_org_id_requester_id (org_id,requester_id),
+        INDEX ix_ticket_org_id_assignee_id (org_id,assignee_id),
+        INDEX ix_ticket_org_id_status (org_id,status),
+        INDEX ix_ticket_org_id_updated_at (org_id,updated_at)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP TABLE tickets;');
+    await queryRunner.query('DROP TABLE ticket;');
   }
 }

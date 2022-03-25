@@ -15,8 +15,8 @@ export class Category {
   @Expose()
   id: number;
 
-  @Column({ name: 'organization_id' })
-  organizationId: number;
+  @Column({ name: 'org_id' })
+  orgId: number;
 
   @Column({ name: 'parent_id' })
   @Expose()

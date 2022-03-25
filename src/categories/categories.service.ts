@@ -20,39 +20,36 @@ export class CategoriesService {
   @InjectRepository(Category)
   private categoriesRepository: Repository<Category>;
 
-  find(organizationId: number): Promise<Category[]> {
-    return this.categoriesRepository.find({ organizationId });
+  find(orgId: number): Promise<Category[]> {
+    return this.categoriesRepository.find({ orgId });
   }
 
-  findByIds(organizationId: number, ids: number[]): Promise<Category[]> {
-    return this.categoriesRepository.find({ organizationId, id: In(ids) });
+  findByIds(orgId: number, ids: number[]): Promise<Category[]> {
+    return this.categoriesRepository.find({ orgId, id: In(ids) });
   }
 
-  findOne(organizationId: number, id: number): Promise<Category | undefined> {
-    return this.categoriesRepository.findOne({ organizationId, id });
+  findOne(orgId: number, id: number): Promise<Category | undefined> {
+    return this.categoriesRepository.findOne({ orgId, id });
   }
 
-  async findOneOrFail(organizationId: number, id: number): Promise<Category> {
-    const category = await this.findOne(organizationId, id);
+  async findOneOrFail(orgId: number, id: number): Promise<Category> {
+    const category = await this.findOne(orgId, id);
     if (!category) {
       throw new NotFoundException(`category ${id} does not exist`);
     }
     return category;
   }
 
-  async create(
-    organizationId: number,
-    data: CreateCategoryDto,
-  ): Promise<number> {
+  async create(orgId: number, data: CreateCategoryDto): Promise<number> {
     const category = new Category();
-    category.organizationId = organizationId;
+    category.orgId = orgId;
     Object.assign(category, data);
 
     await this.connection.transaction(async (manager) => {
       if (category.parentId) {
         const parent = await manager.findOne(Category, {
           where: {
-            organizationId,
+            orgId,
             id: category.parentId,
           },
           lock: { mode: 'pessimistic_read' },
@@ -71,14 +68,14 @@ export class CategoriesService {
     return category.id;
   }
 
-  async update(organizationId: number, id: number, data: UpdateCategoryDto) {
+  async update(orgId: number, id: number, data: UpdateCategoryDto) {
     await this.connection.transaction((manager) =>
-      this.updateByEntityManager(manager, organizationId, id, data),
+      this.updateByEntityManager(manager, orgId, id, data),
     );
   }
 
   async batchUpdate(
-    organizationId: number,
+    orgId: number,
     datas: BatchUpdateCategoryDto['categories'],
   ) {
     if (datas.length === 0) {
@@ -88,12 +85,7 @@ export class CategoriesService {
     await this.connection.transaction(async (manager) => {
       for (const data of datas) {
         try {
-          await this.updateByEntityManager(
-            manager,
-            organizationId,
-            data.id,
-            data,
-          );
+          await this.updateByEntityManager(manager, orgId, data.id, data);
         } catch (error) {
           throw new BadRequestException(
             `failed to update category ${data.id}: ${error.message}`,
@@ -105,7 +97,7 @@ export class CategoriesService {
 
   private async updateByEntityManager(
     manager: EntityManager,
-    organizationId: number,
+    orgId: number,
     id: number,
     data: UpdateCategoryDto,
   ) {
@@ -118,7 +110,7 @@ export class CategoriesService {
 
     const findOne = (id: number) =>
       manager.findOne(Category, {
-        where: { organizationId, id },
+        where: { orgId, id },
         lock: { mode: 'pessimistic_read' },
       });
 
@@ -147,7 +139,7 @@ export class CategoriesService {
     if (data.active === false && data.active !== category.active) {
       const activeChild = await manager.findOne(Category, {
         where: {
-          organizationId,
+          orgId,
           parentId: id,
           active: true,
         },
@@ -158,6 +150,6 @@ export class CategoriesService {
       }
     }
 
-    await manager.update(Category, { organizationId, id }, data);
+    await manager.update(Category, { orgId, id }, data);
   }
 }

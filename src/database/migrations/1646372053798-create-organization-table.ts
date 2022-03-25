@@ -14,12 +14,12 @@ export class createOrganizationTable1646372053798
         updated_at  datetime(3)      NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
         deleted_at  datetime(3),
         PRIMARY KEY (id),
-        UNIQUE KEY uq_organizations_subdomain (subdomain(20))
+        UNIQUE KEY uq_organization_subdomain (subdomain(20))
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP TABLE organizations;');
+    await queryRunner.query('DROP TABLE organization;');
   }
 }
