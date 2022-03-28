@@ -18,6 +18,14 @@ export const cacheConfig = registerAs('cache', () => {
   };
 });
 
+export const queueConfig = registerAs('queue', () => {
+  const url = process.env.REDIS_URL_QUEUE;
+  return {
+    ...parseRedisUrl(url),
+    url,
+  };
+});
+
 export const sequenceConfig = registerAs('sequence', () => ({
   url: process.env.REDIS_URL_QUEUE,
 }));
