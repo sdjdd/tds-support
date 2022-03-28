@@ -1,34 +1,22 @@
 import { Exclude, Expose } from 'class-transformer';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('ticket')
+@Entity('reply')
 @Exclude()
-export class Ticket {
+export class Reply {
   @PrimaryGeneratedColumn()
+  @Expose()
   id: number;
 
   @Column({ name: 'org_id' })
   orgId: number;
 
-  @Column()
-  @Expose({ name: 'id' })
-  seq: number;
+  @Column({ name: 'ticket_id' })
+  ticketId: number;
 
-  @Column({ name: 'category_id' })
+  @Column({ name: 'author_id' })
   @Expose()
-  categoryId: number;
-
-  @Column({ name: 'requester_id' })
-  @Expose()
-  requesterId: number;
-
-  @Column({ name: 'assignee_id' })
-  @Expose()
-  assigneeId?: number;
-
-  @Column()
-  @Expose()
-  title: string;
+  authorId: number;
 
   @Column()
   @Expose()
@@ -38,13 +26,9 @@ export class Ticket {
   @Expose()
   htmlContent: string;
 
-  @Column({ name: 'reply_count' })
-  @Expose()
-  replyCount: number;
-
   @Column()
   @Expose()
-  status: number;
+  public: boolean;
 
   @Column({ name: 'created_at' })
   @Expose()

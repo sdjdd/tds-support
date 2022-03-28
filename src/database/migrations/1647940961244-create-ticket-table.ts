@@ -12,6 +12,7 @@ export class createTicketTable1647940961244 implements MigrationInterface {
         assignee_id  int(11) unsigned,
         title        varchar(255)         NOT NULL,
         content      text                 NOT NULL,
+        html_content text                 NOT NULL,
         reply_count  smallint(6) unsigned NOT NULL DEFAULT 0,
         status       smallint(6) unsigned NOT NULL,
         created_at   datetime(3)          NOT NULL DEFAULT NOW(3),

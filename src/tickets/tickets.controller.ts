@@ -17,11 +17,13 @@ import { AuthGuard, CurrentUser, Org } from '@/common';
 import { CaslAbilityFactory } from '@/casl';
 import { Organization } from '@/organizations';
 import { User } from '@/users';
+import { Ticket } from './entities/ticket.entity';
+import { ReplyService } from './reply.service';
+import { TicketsService } from './ticket.service';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
-import { Ticket } from './entities/ticket.entity';
-import { TicketsService } from './ticket.service';
 import { FindTicketsDto } from './dtos/find-tickets.dto';
+import { CreateReplyDto } from './dtos/create-reply.dto';
 
 @Controller('tickets')
 @UseGuards(AuthGuard)
@@ -29,6 +31,7 @@ import { FindTicketsDto } from './dtos/find-tickets.dto';
 export class TicketsController {
   constructor(
     private caslAbilityFactory: CaslAbilityFactory,
+    private replyService: ReplyService,
     private ticketsService: TicketsService,
   ) {}
 
@@ -110,6 +113,54 @@ export class TicketsController {
     }
     return {
       ticket,
+    };
+  }
+
+  @Post(':seq/replies')
+  async createReply(
+    @Org() org: Organization,
+    @CurrentUser() user: User,
+    @Param('seq', ParseIntPipe) seq: number,
+    @Body() data: CreateReplyDto,
+  ) {
+    const ticket = await this.ticketsService.findOneBySeqOrFail(org.id, seq);
+    const ability = this.caslAbilityFactory.createForUser(user);
+    if (ability.cannot('read', ticket)) {
+      throw new ForbiddenException();
+    }
+    if (!user.isAgent()) {
+      data.public = true;
+    }
+    const replyId = await this.replyService.create(
+      org.id,
+      ticket.id,
+      user.id,
+      data,
+    );
+    const reply = await this.replyService.findOne(org.id, ticket.id, replyId);
+    return {
+      reply,
+    };
+  }
+
+  @Get(':seq/replies')
+  async findReplies(
+    @Org() org: Organization,
+    @CurrentUser() user: User,
+    @Param('seq', ParseIntPipe) seq: number,
+  ) {
+    const ticket = await this.ticketsService.findOneBySeqOrFail(org.id, seq);
+    const ability = this.caslAbilityFactory.createForUser(user);
+    if (ability.cannot('read', ticket)) {
+      throw new ForbiddenException();
+    }
+    const replies = await this.replyService.findForTicket(
+      org.id,
+      ticket.id,
+      !user.isAgent(),
+    );
+    return {
+      replies,
     };
   }
 }

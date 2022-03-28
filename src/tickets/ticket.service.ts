@@ -9,11 +9,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import _ from 'lodash';
 import { CategoriesService } from '@/categories';
+import { MarkdownService } from '@/markdown';
 import { SequenceService } from '@/sequence';
 import { UsersService } from '@/users';
-import { CreateTicketDto } from './dtos/create-ticket.dto';
-import { Ticket } from './entities/ticket.entity';
 import { status } from './constants';
+import { Ticket } from './entities/ticket.entity';
+import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
 
 export interface FindTicketsOptions {
@@ -33,8 +34,9 @@ export class TicketsService {
   private usersService: UsersService;
 
   constructor(
-    private sequenceService: SequenceService,
     private categoriesService: CategoriesService,
+    private markdownService: MarkdownService,
+    private sequenceService: SequenceService,
   ) {}
 
   async find(
@@ -102,6 +104,7 @@ export class TicketsService {
     ticket.categoryId = data.categoryId;
     ticket.title = data.title;
     ticket.content = data.content;
+    ticket.htmlContent = this.markdownService.render(data.content);
     ticket.replyCount = 0;
     await this.ticketsRepository.insert(ticket);
     return ticket.id;
