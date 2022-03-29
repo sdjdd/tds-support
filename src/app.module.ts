@@ -1,7 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bull';
 import { OrganizationMiddleware } from './common';
-import { cacheConfig, sequenceConfig } from './config/redis';
+import { cacheConfig, queueConfig, sequenceConfig } from './config/redis';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth';
@@ -17,7 +18,15 @@ import { TicketsModule } from './tickets';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [cacheConfig, sequenceConfig],
+      load: [cacheConfig, queueConfig, sequenceConfig],
+    }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configModule: ConfigService) => {
+        return {
+          redis: configModule.get('queue'),
+        };
+      },
     }),
     CacheModule,
     DatabaseModule,

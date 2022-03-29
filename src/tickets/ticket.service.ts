@@ -5,8 +5,10 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
+import { Connection, Repository } from 'typeorm';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 import _ from 'lodash';
 import { CategoriesService } from '@/categories';
 import { MarkdownService } from '@/markdown';
@@ -27,6 +29,9 @@ export interface FindTicketsOptions {
 
 @Injectable()
 export class TicketsService {
+  @InjectConnection()
+  private connection: Connection;
+
   @InjectRepository(Ticket)
   private ticketsRepository: Repository<Ticket>;
 
@@ -37,6 +42,7 @@ export class TicketsService {
     private categoriesService: CategoriesService,
     private markdownService: MarkdownService,
     private sequenceService: SequenceService,
+    @InjectQueue('sync-to-es') private syncToEsQueue: Queue,
   ) {}
 
   async find(
@@ -96,6 +102,7 @@ export class TicketsService {
   async create(orgId: number, data: CreateTicketDto): Promise<number> {
     await this.categoriesService.findOneOrFail(orgId, data.categoryId);
     await this.usersService.findOneOrFail(orgId, data.requesterId);
+
     const ticket = new Ticket();
     ticket.orgId = orgId;
     ticket.seq = await this.getNextSequence(orgId);
@@ -106,7 +113,14 @@ export class TicketsService {
     ticket.content = data.content;
     ticket.htmlContent = this.markdownService.render(data.content);
     ticket.replyCount = 0;
-    await this.ticketsRepository.insert(ticket);
+
+    await this.connection.transaction(async (manager) => {
+      await manager.insert(Ticket, ticket);
+      await this.syncToEsQueue.add('ticket', {
+        id: ticket.id,
+      });
+    });
+
     return ticket.id;
   }
 
