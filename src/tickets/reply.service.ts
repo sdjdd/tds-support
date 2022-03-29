@@ -36,6 +36,7 @@ export class ReplyService {
         { orgId, id: ticketId },
         {
           replyCount: () => 'reply_count + 1',
+          syncedVersion: null,
         },
       );
     });

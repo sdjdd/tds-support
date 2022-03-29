@@ -4,6 +4,7 @@ import { BullModule } from '@nestjs/bull';
 import { CaslModule } from '@/casl';
 import { CategoriesModule } from '@/categories';
 import { MarkdownModule } from '@/markdown';
+import { SearchModule } from '@/search';
 import { SequenceModule } from '@/sequence';
 import { UsersModule } from '@/users';
 import { Reply } from './entities/reply.entity';
@@ -22,11 +23,13 @@ import { SyncProcessor } from './sync.processor';
     SequenceModule,
     forwardRef(() => UsersModule),
     BullModule.registerQueue({
-      name: 'sync-to-es',
+      name: 'syncTicket',
       defaultJobOptions: {
         removeOnComplete: true,
+        removeOnFail: true,
       },
     }),
+    SearchModule,
   ],
   providers: [ReplyService, TicketsService, SyncProcessor],
   controllers: [TicketsController],

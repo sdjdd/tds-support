@@ -3,10 +3,11 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  OnApplicationBootstrap,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import _ from 'lodash';
@@ -28,10 +29,7 @@ export interface FindTicketsOptions {
 }
 
 @Injectable()
-export class TicketsService {
-  @InjectConnection()
-  private connection: Connection;
-
+export class TicketsService implements OnApplicationBootstrap {
   @InjectRepository(Ticket)
   private ticketsRepository: Repository<Ticket>;
 
@@ -42,8 +40,23 @@ export class TicketsService {
     private categoriesService: CategoriesService,
     private markdownService: MarkdownService,
     private sequenceService: SequenceService,
-    @InjectQueue('sync-to-es') private syncToEsQueue: Queue,
+
+    @InjectQueue('syncTicket')
+    private syncTicketQueue: Queue,
   ) {}
+
+  async onApplicationBootstrap() {
+    await this.syncTicketQueue.add('new', null, {
+      repeat: {
+        every: 1000 * 60,
+      },
+    });
+    await this.syncTicketQueue.add('outdated', null, {
+      repeat: {
+        every: 1000 * 60,
+      },
+    });
+  }
 
   async find(
     orgId: number,
@@ -114,12 +127,7 @@ export class TicketsService {
     ticket.htmlContent = this.markdownService.render(data.content);
     ticket.replyCount = 0;
 
-    await this.connection.transaction(async (manager) => {
-      await manager.insert(Ticket, ticket);
-      await this.syncToEsQueue.add('ticket', {
-        id: ticket.id,
-      });
-    });
+    await this.ticketsRepository.insert(ticket);
 
     return ticket.id;
   }
@@ -134,7 +142,13 @@ export class TicketsService {
     if (data.assigneeId) {
       await this.assertAssigneeIdIsValid(orgId, data.assigneeId);
     }
-    await this.ticketsRepository.update({ orgId, seq }, data);
+    await this.ticketsRepository.update(
+      { orgId, seq },
+      {
+        ...data,
+        syncedVersion: null,
+      },
+    );
   }
 
   private getNextSequence(orgId: number) {
