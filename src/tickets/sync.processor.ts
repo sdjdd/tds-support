@@ -1,13 +1,17 @@
 import { Client } from '@elastic/elasticsearch';
-import { Process, Processor } from '@nestjs/bull';
-import { Job } from 'bull';
+import { InjectQueue, Process, Processor } from '@nestjs/bull';
+import { Job, Queue } from 'bull';
 import { Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import _ from 'lodash';
 import { ES_CLIENT } from '@/search';
 import { Ticket } from './entities/ticket.entity';
-import { CreateSearchDocData, UpdateSearchDocData } from './types';
+import {
+  CreateSearchDocData,
+  RebuildSearchIndexData,
+  UpdateSearchDocData,
+} from './types';
 
 @Processor('search-index-ticket')
 export class SyncProcessor {
@@ -16,6 +20,11 @@ export class SyncProcessor {
 
   @Inject(ES_CLIENT)
   private client: Client;
+
+  constructor(
+    @InjectQueue('search-index-ticket')
+    private searchIndexQueue: Queue,
+  ) {}
 
   @Process({
     name: 'create',
@@ -51,6 +60,48 @@ export class SyncProcessor {
       body: {
         doc: updateData,
       },
+    });
+  }
+
+  @Process('rebuild')
+  async rebuildSearchIndex(job: Job<RebuildSearchIndexData>) {
+    const { startId, endId } = job.data;
+    const qb = this.ticketRepository.createQueryBuilder('ticket');
+    qb.where('ticket.id >= :startId', { startId });
+    if (endId) {
+      qb.andWhere('ticket.id < :endId', { endId });
+    }
+    qb.orderBy('ticket.id', 'ASC');
+    qb.take(1000);
+
+    const tickets = await qb.getMany();
+    if (tickets.length === 0) {
+      console.log('rebuild ticket search index finish');
+      return;
+    }
+
+    const docs = tickets.map((ticket) => this.newSearchDoc(ticket));
+    await this.client.bulk({
+      body: docs
+        .map((doc) => [
+          {
+            index: {
+              _index: 'ticket',
+              _id: doc.id,
+            },
+          },
+          doc,
+        ])
+        .flat(),
+    });
+
+    const maxId = _.last(tickets).id;
+    const jobData: RebuildSearchIndexData = {
+      startId: maxId + 1,
+      endId,
+    };
+    await this.searchIndexQueue.add('rebuild', jobData, {
+      delay: 2000,
     });
   }
 
