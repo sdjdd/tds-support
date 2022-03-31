@@ -15,7 +15,6 @@ export class createTicketTable1647940961244 implements MigrationInterface {
         html_content   text                 NOT NULL,
         reply_count    smallint(6) unsigned NOT NULL DEFAULT 0,
         status         smallint(6) unsigned NOT NULL,
-        synced_version tinyint(4) unsigned,
         created_at     datetime(3)          NOT NULL DEFAULT NOW(3),
         updated_at     datetime(3)          NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
         PRIMARY KEY (id),
@@ -24,8 +23,7 @@ export class createTicketTable1647940961244 implements MigrationInterface {
         INDEX ix_ticket_org_id_requester_id (org_id,requester_id),
         INDEX ix_ticket_org_id_assignee_id (org_id,assignee_id),
         INDEX ix_ticket_org_id_status (org_id,status),
-        INDEX ix_ticket_org_id_updated_at (org_id,updated_at),
-        INDEX ix_ticket_synced_version (synced_version)
+        INDEX ix_ticket_org_id_updated_at (org_id,updated_at)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `);
   }

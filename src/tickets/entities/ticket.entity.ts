@@ -46,9 +46,6 @@ export class Ticket {
   @Expose()
   status: number;
 
-  @Column({ name: 'synced_version' })
-  syncedVersion?: number;
-
   @Column({ name: 'created_at' })
   @Expose()
   createdAt: Date;

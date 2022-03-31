@@ -108,7 +108,7 @@ export class TicketsController {
       }
     });
     if (!_.isEmpty(data)) {
-      await this.ticketsService.update(org.id, seq, data);
+      await this.ticketsService.update(org.id, ticket.id, data);
       ticket = await this.ticketsService.findOne(org.id, ticket.id);
     }
     return {

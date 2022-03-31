@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 import { MarkdownService } from '@/markdown';
 import { Reply } from './entities/reply.entity';
 import { Ticket } from './entities/ticket.entity';
 import { CreateReplyDto } from './dtos/create-reply.dto';
+import { UpdateSearchDocData } from './types';
 
 @Injectable()
 export class ReplyService {
@@ -14,7 +17,11 @@ export class ReplyService {
   @InjectRepository(Reply)
   private replyRepository: Repository<Reply>;
 
-  constructor(private markdownService: MarkdownService) {}
+  constructor(
+    private markdownService: MarkdownService,
+    @InjectQueue('search-index-ticket')
+    private searchIndexQueue: Queue,
+  ) {}
 
   async create(
     orgId: number,
@@ -29,6 +36,7 @@ export class ReplyService {
     reply.public = data.public ?? true;
     reply.content = data.content;
     reply.htmlContent = this.markdownService.render(data.content);
+
     await this.connection.transaction(async (manager) => {
       await manager.insert(Reply, reply);
       await manager.update(
@@ -36,10 +44,16 @@ export class ReplyService {
         { orgId, id: ticketId },
         {
           replyCount: () => 'reply_count + 1',
-          syncedVersion: null,
         },
       );
     });
+
+    const jobData: UpdateSearchDocData = {
+      id: ticketId,
+      fields: ['replyCount'],
+    };
+    await this.searchIndexQueue.add('update', jobData);
+
     return reply.id;
   }
 

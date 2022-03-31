@@ -3,11 +3,10 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-  OnApplicationBootstrap,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
+import { Connection, Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import _ from 'lodash';
@@ -19,6 +18,7 @@ import { status } from './constants';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
+import { CreateSearchDocData, UpdateSearchDocData } from './types';
 
 export interface FindTicketsOptions {
   requesterId?: number;
@@ -29,7 +29,10 @@ export interface FindTicketsOptions {
 }
 
 @Injectable()
-export class TicketsService implements OnApplicationBootstrap {
+export class TicketsService {
+  @InjectConnection()
+  private connection: Connection;
+
   @InjectRepository(Ticket)
   private ticketsRepository: Repository<Ticket>;
 
@@ -41,22 +44,9 @@ export class TicketsService implements OnApplicationBootstrap {
     private markdownService: MarkdownService,
     private sequenceService: SequenceService,
 
-    @InjectQueue('syncTicket')
-    private syncTicketQueue: Queue,
+    @InjectQueue('search-index-ticket')
+    private searchIndexQueue: Queue,
   ) {}
-
-  async onApplicationBootstrap() {
-    await this.syncTicketQueue.add('new', null, {
-      repeat: {
-        every: 1000 * 60,
-      },
-    });
-    await this.syncTicketQueue.add('outdated', null, {
-      repeat: {
-        every: 1000 * 60,
-      },
-    });
-  }
 
   async find(
     orgId: number,
@@ -129,26 +119,33 @@ export class TicketsService implements OnApplicationBootstrap {
 
     await this.ticketsRepository.insert(ticket);
 
+    const jobData: CreateSearchDocData = {
+      id: ticket.id,
+    };
+    await this.searchIndexQueue.add('create', jobData);
+
     return ticket.id;
   }
 
-  async update(orgId: number, seq: number, data: UpdateTicketDto) {
+  async update(orgId: number, id: number, data: UpdateTicketDto) {
     if (_.isEmpty(data)) {
       return;
     }
+
     if (data.categoryId) {
       await this.categoriesService.findOneOrFail(orgId, data.categoryId);
     }
     if (data.assigneeId) {
       await this.assertAssigneeIdIsValid(orgId, data.assigneeId);
     }
-    await this.ticketsRepository.update(
-      { orgId, seq },
-      {
-        ...data,
-        syncedVersion: null,
-      },
-    );
+
+    await this.ticketsRepository.update(id, data);
+
+    const jobData: UpdateSearchDocData = {
+      id,
+      fields: Object.keys(data),
+    };
+    await this.searchIndexQueue.add('update', jobData);
   }
 
   private getNextSequence(orgId: number) {

@@ -23,10 +23,9 @@ import { SyncProcessor } from './sync.processor';
     SequenceModule,
     forwardRef(() => UsersModule),
     BullModule.registerQueue({
-      name: 'syncTicket',
+      name: 'search-index-ticket',
       defaultJobOptions: {
         removeOnComplete: true,
-        removeOnFail: true,
       },
     }),
     SearchModule,
