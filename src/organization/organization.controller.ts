@@ -24,7 +24,7 @@ import { DomainService } from './domain.service';
 })
 @UseGuards(MasterKeyGuard)
 @UsePipes(ZodValidationPipe)
-export class OrganizationsController {
+export class OrganizationController {
   constructor(
     private organizationService: OrganizationService,
     private domainService: DomainService,
