@@ -14,19 +14,19 @@ import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { Organization } from '@/organization';
 import { User } from '@/users';
-import { CategoriesService } from './categories.service';
+import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { UpdateCategoryDto } from './dtos/update-category-dto';
 import { BatchUpdateCategoryDto } from './dtos/batch-update-category.dto';
 
 @Controller('categories')
 @UsePipes(ZodValidationPipe)
-export class CategoriesController {
-  constructor(private categoriesService: CategoriesService) {}
+export class CategoryController {
+  constructor(private categoryService: CategoryService) {}
 
   @Get()
   async find(@Org() org: Organization) {
-    const catgories = await this.categoriesService.find(org.id);
+    const catgories = await this.categoryService.find(org.id);
     return {
       catgories,
     };
@@ -37,7 +37,7 @@ export class CategoriesController {
     @Org() org: Organization,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const category = await this.categoriesService.findOneOrFail(org.id, id);
+    const category = await this.categoryService.findOneOrFail(org.id, id);
     return {
       category,
     };
@@ -53,8 +53,8 @@ export class CategoriesController {
     if (!user.isAgent()) {
       throw new ForbiddenException();
     }
-    const id = await this.categoriesService.create(org.id, data);
-    const category = await this.categoriesService.findOne(org.id, id);
+    const id = await this.categoryService.create(org.id, data);
+    const category = await this.categoryService.findOne(org.id, id);
     return {
       category,
     };
@@ -71,8 +71,8 @@ export class CategoriesController {
     if (!user.isAgent()) {
       throw new ForbiddenException();
     }
-    await this.categoriesService.update(org.id, id, data);
-    const category = await this.categoriesService.findOne(org.id, id);
+    await this.categoryService.update(org.id, id, data);
+    const category = await this.categoryService.findOne(org.id, id);
     return {
       category,
     };
@@ -91,9 +91,9 @@ export class CategoriesController {
     if (datas.length === 0) {
       return { categories: [] };
     }
-    await this.categoriesService.batchUpdate(org.id, datas);
+    await this.categoryService.batchUpdate(org.id, datas);
     const ids = datas.map((data) => data.id);
-    const categories = await this.categoriesService.findByIds(org.id, ids);
+    const categories = await this.categoryService.findByIds(org.id, ids);
     return {
       categories,
     };

@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import { CaslModule } from '@/casl';
-import { CategoriesModule } from '@/categories';
+import { CategoryModule } from '@/categories';
 import { MarkdownModule } from '@/markdown';
 import { SearchModule } from '@/search';
 import { SequenceModule } from '@/sequence';
@@ -18,7 +18,7 @@ import { SyncProcessor } from './sync.processor';
   imports: [
     TypeOrmModule.forFeature([Ticket, Reply]),
     CaslModule,
-    CategoriesModule,
+    CategoryModule,
     MarkdownModule,
     SequenceModule,
     forwardRef(() => UsersModule),

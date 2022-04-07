@@ -1,2 +1,2 @@
-export { CategoriesModule } from './categories.module';
-export { CategoriesService } from './categories.service';
+export { CategoryModule } from './category.module';
+export { CategoryService } from './category.service';

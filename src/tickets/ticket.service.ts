@@ -10,7 +10,7 @@ import { Connection, Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import _ from 'lodash';
-import { CategoriesService } from '@/categories';
+import { CategoryService } from '@/categories';
 import { MarkdownService } from '@/markdown';
 import { SequenceService } from '@/sequence';
 import { UsersService } from '@/users';
@@ -40,7 +40,7 @@ export class TicketsService {
   private usersService: UsersService;
 
   constructor(
-    private categoriesService: CategoriesService,
+    private categoryService: CategoryService,
     private markdownService: MarkdownService,
     private sequenceService: SequenceService,
 
@@ -103,7 +103,7 @@ export class TicketsService {
   }
 
   async create(orgId: number, data: CreateTicketDto): Promise<number> {
-    await this.categoriesService.findOneOrFail(orgId, data.categoryId);
+    await this.categoryService.findOneOrFail(orgId, data.categoryId);
     await this.usersService.findOneOrFail(orgId, data.requesterId);
 
     const ticket = new Ticket();
@@ -133,7 +133,7 @@ export class TicketsService {
     }
 
     if (data.categoryId) {
-      await this.categoriesService.findOneOrFail(orgId, data.categoryId);
+      await this.categoryService.findOneOrFail(orgId, data.categoryId);
     }
     if (data.assigneeId) {
       await this.assertAssigneeIdIsValid(orgId, data.assigneeId);
