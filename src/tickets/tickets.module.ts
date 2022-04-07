@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import { CaslModule } from '@/casl';
-import { CategoryModule } from '@/categories';
+import { CategoryModule } from '@/category';
 import { MarkdownModule } from '@/markdown';
 import { SearchModule } from '@/search';
 import { SequenceModule } from '@/sequence';

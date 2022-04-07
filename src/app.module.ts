@@ -11,7 +11,7 @@ import { CacheModule } from './cache';
 import { DatabaseModule } from './database';
 import { OrganizationModule } from './organization';
 import { UsersModule } from './users';
-import { CategoryModule } from './categories';
+import { CategoryModule } from './category';
 import { SequenceModule } from './sequence';
 import { TicketsModule } from './tickets';
 

@@ -10,7 +10,7 @@ import { Connection, Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import _ from 'lodash';
-import { CategoryService } from '@/categories';
+import { CategoryService } from '@/category';
 import { MarkdownService } from '@/markdown';
 import { SequenceService } from '@/sequence';
 import { UsersService } from '@/users';
