@@ -1,3 +1,3 @@
 export { User } from './entities/user.entity';
-export { UsersModule } from './users.module';
-export { UsersService } from './users.service';
+export { UserModule } from './user.module';
+export { UserService } from './user.service';

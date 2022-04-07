@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { CategoryService } from '@/category';
 import { MarkdownService } from '@/markdown';
 import { SequenceService } from '@/sequence';
-import { UsersService } from '@/users';
+import { UserService } from '@/users';
 import { status } from './constants';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
@@ -36,8 +36,8 @@ export class TicketsService {
   @InjectRepository(Ticket)
   private ticketsRepository: Repository<Ticket>;
 
-  @Inject(forwardRef(() => UsersService))
-  private usersService: UsersService;
+  @Inject(forwardRef(() => UserService))
+  private userService: UserService;
 
   constructor(
     private categoryService: CategoryService,
@@ -104,7 +104,7 @@ export class TicketsService {
 
   async create(orgId: number, data: CreateTicketDto): Promise<number> {
     await this.categoryService.findOneOrFail(orgId, data.categoryId);
-    await this.usersService.findOneOrFail(orgId, data.requesterId);
+    await this.userService.findOneOrFail(orgId, data.requesterId);
 
     const ticket = new Ticket();
     ticket.orgId = orgId;
@@ -153,7 +153,7 @@ export class TicketsService {
   }
 
   private async assertAssigneeIdIsValid(orgId: number, assigneeId: number) {
-    const user = await this.usersService.findOneOrFail(orgId, assigneeId);
+    const user = await this.userService.findOneOrFail(orgId, assigneeId);
     if (!user.isAgent()) {
       throw new UnprocessableEntityException(`user ${assigneeId} is not agent`);
     }

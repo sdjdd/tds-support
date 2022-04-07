@@ -6,7 +6,7 @@ import { CategoryModule } from '@/category';
 import { MarkdownModule } from '@/markdown';
 import { SearchModule } from '@/search';
 import { SequenceModule } from '@/sequence';
-import { UsersModule } from '@/users';
+import { UserModule } from '@/users';
 import { Reply } from './entities/reply.entity';
 import { Ticket } from './entities/ticket.entity';
 import { ReplyService } from './reply.service';
@@ -21,7 +21,7 @@ import { SyncProcessor } from './sync.processor';
     CategoryModule,
     MarkdownModule,
     SequenceModule,
-    forwardRef(() => UsersModule),
+    forwardRef(() => UserModule),
     BullModule.registerQueue({
       name: 'search-index-ticket',
       defaultJobOptions: {
