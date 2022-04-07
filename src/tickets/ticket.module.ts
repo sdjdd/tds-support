@@ -10,8 +10,8 @@ import { UserModule } from '@/user';
 import { Reply } from './entities/reply.entity';
 import { Ticket } from './entities/ticket.entity';
 import { ReplyService } from './reply.service';
-import { TicketsService } from './ticket.service';
-import { TicketsController } from './tickets.controller';
+import { TicketService } from './ticket.service';
+import { TicketController } from './ticket.controller';
 import { SyncProcessor } from './sync.processor';
 
 @Module({
@@ -30,8 +30,8 @@ import { SyncProcessor } from './sync.processor';
     }),
     SearchModule,
   ],
-  providers: [ReplyService, TicketsService, SyncProcessor],
-  controllers: [TicketsController],
-  exports: [TicketsService],
+  providers: [ReplyService, TicketService, SyncProcessor],
+  controllers: [TicketController],
+  exports: [TicketService],
 })
-export class TicketsModule {}
+export class TicketModule {}

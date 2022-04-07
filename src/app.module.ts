@@ -13,7 +13,7 @@ import { OrganizationModule } from './organization';
 import { UserModule } from './user';
 import { CategoryModule } from './category';
 import { SequenceModule } from './sequence';
-import { TicketsModule } from './tickets';
+import { TicketModule } from './tickets';
 
 @Module({
   imports: [
@@ -36,7 +36,7 @@ import { TicketsModule } from './tickets';
     UserModule,
     CategoryModule,
     SequenceModule,
-    TicketsModule,
+    TicketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -16,7 +16,7 @@ import {
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { Organization } from '@/organization';
-import { TicketsService } from '@/tickets';
+import { TicketService } from '@/tickets';
 import { FindTicketsDto } from '@/tickets/dtos/find-tickets.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UserService } from './user.service';
@@ -27,8 +27,8 @@ import { FindUsersParams } from './dtos/find-users-params.dto';
 @Controller('users')
 @UsePipes(ZodValidationPipe)
 export class UserController {
-  @Inject(forwardRef(() => TicketsService))
-  private ticketsService: TicketsService;
+  @Inject(forwardRef(() => TicketService))
+  private ticketService: TicketService;
 
   constructor(private userService: UserService) {}
 
@@ -93,7 +93,7 @@ export class UserController {
       }
       await this.userService.findOneOrFail(org.id, id);
     }
-    const tickets = await this.ticketsService.find(org.id, {
+    const tickets = await this.ticketService.find(org.id, {
       ...(params as any),
       requesterId: id,
     });
@@ -116,7 +116,7 @@ export class UserController {
     if (id !== user.id) {
       await this.userService.findOneOrFail(org.id, id);
     }
-    const tickets = await this.ticketsService.find(org.id, {
+    const tickets = await this.ticketService.find(org.id, {
       ...(params as any),
       assigneeId: id,
     });

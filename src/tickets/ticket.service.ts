@@ -5,8 +5,8 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import _ from 'lodash';
@@ -29,10 +29,7 @@ export interface FindTicketsOptions {
 }
 
 @Injectable()
-export class TicketsService {
-  @InjectConnection()
-  private connection: Connection;
-
+export class TicketService {
   @InjectRepository(Ticket)
   private ticketsRepository: Repository<Ticket>;
 
