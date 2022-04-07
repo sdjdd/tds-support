@@ -16,7 +16,7 @@ import { CreateOrganizationDto } from './dtos/create-organization.dto';
 import { CreateDomainDto } from './dtos/create-domain.dto';
 import { UpdateOrganizationDto } from './dtos/update-organization.dto';
 import { OrganizationsService } from './organizations.service';
-import { DomainsService } from './domains.service';
+import { DomainService } from './domain.service';
 
 @Controller({
   host: process.env.ADMIN_DOMAIN,
@@ -27,7 +27,7 @@ import { DomainsService } from './domains.service';
 export class OrganizationsController {
   constructor(
     private organizationsService: OrganizationsService,
-    private domainsService: DomainsService,
+    private domainsService: DomainService,
   ) {}
 
   @Post()
