@@ -13,7 +13,7 @@ import { OrganizationModule } from './organization';
 import { UserModule } from './user';
 import { CategoryModule } from './category';
 import { SequenceModule } from './sequence';
-import { TicketModule } from './tickets';
+import { TicketModule } from './ticket';
 
 @Module({
   imports: [

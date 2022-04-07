@@ -16,8 +16,8 @@ import {
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { Organization } from '@/organization';
-import { TicketService } from '@/tickets';
-import { FindTicketsDto } from '@/tickets/dtos/find-tickets.dto';
+import { TicketService } from '@/ticket';
+import { FindTicketsDto } from '@/ticket/dtos/find-tickets.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';

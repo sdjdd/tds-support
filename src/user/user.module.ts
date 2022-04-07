@@ -1,4 +1,4 @@
-import { TicketModule } from '@/tickets';
+import { TicketModule } from '@/ticket';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
