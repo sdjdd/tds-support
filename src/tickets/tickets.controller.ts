@@ -15,7 +15,7 @@ import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import _ from 'lodash';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { CaslAbilityFactory } from '@/casl';
-import { Organization } from '@/organizations';
+import { Organization } from '@/organization';
 import { User } from '@/users';
 import { Ticket } from './entities/ticket.entity';
 import { ReplyService } from './reply.service';

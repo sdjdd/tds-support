@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
-import { Organization } from '@/organizations';
+import { Organization } from '@/organization';
 import { TicketsService } from '@/tickets';
 import { FindTicketsDto } from '@/tickets/dtos/find-tickets.dto';
 import { CreateUserDto } from './dtos/create-user.dto';

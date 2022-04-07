@@ -13,4 +13,4 @@ import { DomainService } from './domain.service';
   controllers: [OrganizationsController],
   exports: [OrganizationService],
 })
-export class OrganizationsModule {}
+export class OrganizationModule {}

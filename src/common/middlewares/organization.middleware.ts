@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware, NotFoundException } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { Organization, OrganizationService } from '@/organizations';
+import { Organization, OrganizationService } from '@/organization';
 
 declare module 'express' {
   interface Request {

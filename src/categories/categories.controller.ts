@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
-import { Organization } from '@/organizations';
+import { Organization } from '@/organization';
 import { User } from '@/users';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dtos/create-category.dto';

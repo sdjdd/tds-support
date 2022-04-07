@@ -9,7 +9,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth';
 import { CacheModule } from './cache';
 import { DatabaseModule } from './database';
-import { OrganizationsModule } from './organizations';
+import { OrganizationModule } from './organization';
 import { UsersModule } from './users';
 import { CategoriesModule } from './categories';
 import { SequenceModule } from './sequence';
@@ -32,7 +32,7 @@ import { TicketsModule } from './tickets';
     CacheModule,
     DatabaseModule,
     AuthModule,
-    OrganizationsModule,
+    OrganizationModule,
     UsersModule,
     CategoriesModule,
     SequenceModule,
