@@ -6,7 +6,7 @@ import { CategoryModule } from '@/category';
 import { MarkdownModule } from '@/markdown';
 import { SearchModule } from '@/search';
 import { SequenceModule } from '@/sequence';
-import { UserModule } from '@/users';
+import { UserModule } from '@/user';
 import { Reply } from './entities/reply.entity';
 import { Ticket } from './entities/ticket.entity';
 import { ReplyService } from './reply.service';

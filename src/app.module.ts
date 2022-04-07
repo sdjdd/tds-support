@@ -10,7 +10,7 @@ import { AuthModule } from './auth';
 import { CacheModule } from './cache';
 import { DatabaseModule } from './database';
 import { OrganizationModule } from './organization';
-import { UserModule } from './users';
+import { UserModule } from './user';
 import { CategoryModule } from './category';
 import { SequenceModule } from './sequence';
 import { TicketsModule } from './tickets';

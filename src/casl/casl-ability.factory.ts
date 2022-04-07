@@ -6,7 +6,7 @@ import {
   InferSubjects,
 } from '@casl/ability';
 import { Ticket } from '@/tickets';
-import { User } from '@/users';
+import { User } from '@/user';
 
 type Subjects = InferSubjects<typeof Ticket> | 'all';
 

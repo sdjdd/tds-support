@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { CategoryService } from '@/category';
 import { MarkdownService } from '@/markdown';
 import { SequenceService } from '@/sequence';
-import { UserService } from '@/users';
+import { UserService } from '@/user';
 import { status } from './constants';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dtos/create-ticket.dto';

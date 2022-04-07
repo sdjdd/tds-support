@@ -16,7 +16,7 @@ import _ from 'lodash';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { CaslAbilityFactory } from '@/casl';
 import { Organization } from '@/organization';
-import { User } from '@/users';
+import { User } from '@/user';
 import { Ticket } from './entities/ticket.entity';
 import { ReplyService } from './reply.service';
 import { TicketsService } from './ticket.service';

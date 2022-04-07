@@ -2,7 +2,7 @@ import { Request } from 'express';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { BasicStrategy } from 'passport-http';
-import { UserService } from '@/users';
+import { UserService } from '@/user';
 
 @Injectable()
 export class HttpBasicStrategy extends PassportStrategy(BasicStrategy) {
