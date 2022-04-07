@@ -2,26 +2,26 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import { CaslModule } from '@/casl';
-import { CategoriesModule } from '@/categories';
+import { CategoryModule } from '@/category';
 import { MarkdownModule } from '@/markdown';
 import { SearchModule } from '@/search';
 import { SequenceModule } from '@/sequence';
-import { UsersModule } from '@/users';
+import { UserModule } from '@/user';
 import { Reply } from './entities/reply.entity';
 import { Ticket } from './entities/ticket.entity';
 import { ReplyService } from './reply.service';
-import { TicketsService } from './ticket.service';
-import { TicketsController } from './tickets.controller';
+import { TicketService } from './ticket.service';
+import { TicketController } from './ticket.controller';
 import { SyncProcessor } from './sync.processor';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Ticket, Reply]),
     CaslModule,
-    CategoriesModule,
+    CategoryModule,
     MarkdownModule,
     SequenceModule,
-    forwardRef(() => UsersModule),
+    forwardRef(() => UserModule),
     BullModule.registerQueue({
       name: 'search-index-ticket',
       defaultJobOptions: {
@@ -30,8 +30,8 @@ import { SyncProcessor } from './sync.processor';
     }),
     SearchModule,
   ],
-  providers: [ReplyService, TicketsService, SyncProcessor],
-  controllers: [TicketsController],
-  exports: [TicketsService],
+  providers: [ReplyService, TicketService, SyncProcessor],
+  controllers: [TicketController],
+  exports: [TicketService],
 })
-export class TicketsModule {}
+export class TicketModule {}

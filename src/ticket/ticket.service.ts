@@ -5,15 +5,15 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import _ from 'lodash';
-import { CategoriesService } from '@/categories';
+import { CategoryService } from '@/category';
 import { MarkdownService } from '@/markdown';
 import { SequenceService } from '@/sequence';
-import { UsersService } from '@/users';
+import { UserService } from '@/user';
 import { status } from './constants';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
@@ -29,18 +29,15 @@ export interface FindTicketsOptions {
 }
 
 @Injectable()
-export class TicketsService {
-  @InjectConnection()
-  private connection: Connection;
-
+export class TicketService {
   @InjectRepository(Ticket)
-  private ticketsRepository: Repository<Ticket>;
+  private ticketRepository: Repository<Ticket>;
 
-  @Inject(forwardRef(() => UsersService))
-  private usersService: UsersService;
+  @Inject(forwardRef(() => UserService))
+  private userService: UserService;
 
   constructor(
-    private categoriesService: CategoriesService,
+    private categoryService: CategoryService,
     private markdownService: MarkdownService,
     private sequenceService: SequenceService,
 
@@ -58,7 +55,7 @@ export class TicketsService {
       orderBy,
     }: FindTicketsOptions,
   ): Promise<Ticket[]> {
-    const qb = this.ticketsRepository.createQueryBuilder('ticket');
+    const qb = this.ticketRepository.createQueryBuilder('ticket');
     qb.select([
       'ticket.seq',
       'ticket.categoryId',
@@ -87,11 +84,11 @@ export class TicketsService {
   }
 
   findOne(orgId: number, id: number): Promise<Ticket | undefined> {
-    return this.ticketsRepository.findOne({ orgId, id });
+    return this.ticketRepository.findOne({ orgId, id });
   }
 
   findOneBySeq(orgId: number, seq: number): Promise<Ticket | undefined> {
-    return this.ticketsRepository.findOne({ orgId, seq });
+    return this.ticketRepository.findOne({ orgId, seq });
   }
 
   async findOneBySeqOrFail(orgId: number, seq: number): Promise<Ticket> {
@@ -103,8 +100,8 @@ export class TicketsService {
   }
 
   async create(orgId: number, data: CreateTicketDto): Promise<number> {
-    await this.categoriesService.findOneOrFail(orgId, data.categoryId);
-    await this.usersService.findOneOrFail(orgId, data.requesterId);
+    await this.categoryService.findOneOrFail(orgId, data.categoryId);
+    await this.userService.findOneOrFail(orgId, data.requesterId);
 
     const ticket = new Ticket();
     ticket.orgId = orgId;
@@ -117,7 +114,7 @@ export class TicketsService {
     ticket.htmlContent = this.markdownService.render(data.content);
     ticket.replyCount = 0;
 
-    await this.ticketsRepository.insert(ticket);
+    await this.ticketRepository.insert(ticket);
 
     const jobData: CreateSearchDocData = {
       id: ticket.id,
@@ -133,13 +130,13 @@ export class TicketsService {
     }
 
     if (data.categoryId) {
-      await this.categoriesService.findOneOrFail(orgId, data.categoryId);
+      await this.categoryService.findOneOrFail(orgId, data.categoryId);
     }
     if (data.assigneeId) {
       await this.assertAssigneeIdIsValid(orgId, data.assigneeId);
     }
 
-    await this.ticketsRepository.update(id, data);
+    await this.ticketRepository.update(id, data);
 
     const jobData: UpdateSearchDocData = {
       id,
@@ -153,7 +150,7 @@ export class TicketsService {
   }
 
   private async assertAssigneeIdIsValid(orgId: number, assigneeId: number) {
-    const user = await this.usersService.findOneOrFail(orgId, assigneeId);
+    const user = await this.userService.findOneOrFail(orgId, assigneeId);
     if (!user.isAgent()) {
       throw new UnprocessableEntityException(`user ${assigneeId} is not agent`);
     }

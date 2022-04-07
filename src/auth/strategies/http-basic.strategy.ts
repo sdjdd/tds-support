@@ -2,11 +2,11 @@ import { Request } from 'express';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { BasicStrategy } from 'passport-http';
-import { UsersService } from '@/users';
+import { UserService } from '@/user';
 
 @Injectable()
 export class HttpBasicStrategy extends PassportStrategy(BasicStrategy) {
-  constructor(private usersService: UsersService) {
+  constructor(private userService: UserService) {
     super({ passReqToCallback: true });
   }
 
@@ -18,7 +18,7 @@ export class HttpBasicStrategy extends PassportStrategy(BasicStrategy) {
       );
     }
 
-    const user = await this.usersService.findOneByUsernameAndSelectPassword(
+    const user = await this.userService.findOneByUsernameAndSelectPassword(
       organization.id,
       username,
     );

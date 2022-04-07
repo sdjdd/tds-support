@@ -15,11 +15,11 @@ import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import _ from 'lodash';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { CaslAbilityFactory } from '@/casl';
-import { Organization } from '@/organizations';
-import { User } from '@/users';
+import { Organization } from '@/organization';
+import { User } from '@/user';
 import { Ticket } from './entities/ticket.entity';
 import { ReplyService } from './reply.service';
-import { TicketsService } from './ticket.service';
+import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
 import { FindTicketsDto } from './dtos/find-tickets.dto';
@@ -28,11 +28,11 @@ import { CreateReplyDto } from './dtos/create-reply.dto';
 @Controller('tickets')
 @UseGuards(AuthGuard)
 @UsePipes(ZodValidationPipe)
-export class TicketsController {
+export class TicketController {
   constructor(
     private caslAbilityFactory: CaslAbilityFactory,
     private replyService: ReplyService,
-    private ticketsService: TicketsService,
+    private ticketService: TicketService,
   ) {}
 
   @Post()
@@ -50,8 +50,8 @@ export class TicketsController {
       }
     });
     data.requesterId ??= user.id;
-    const id = await this.ticketsService.create(org.id, data);
-    const ticket = await this.ticketsService.findOne(org.id, id);
+    const id = await this.ticketService.create(org.id, data);
+    const ticket = await this.ticketService.findOne(org.id, id);
     return {
       ticket,
     };
@@ -66,7 +66,7 @@ export class TicketsController {
     if (!user.isAgent()) {
       throw new ForbiddenException();
     }
-    const tickets = await this.ticketsService.find(org.id, params as any);
+    const tickets = await this.ticketService.find(org.id, params as any);
     return {
       tickets,
     };
@@ -78,7 +78,7 @@ export class TicketsController {
     @CurrentUser() user: User,
     @Param('seq', ParseIntPipe) seq: number,
   ) {
-    const ticket = await this.ticketsService.findOneBySeqOrFail(org.id, seq);
+    const ticket = await this.ticketService.findOneBySeqOrFail(org.id, seq);
     const ability = this.caslAbilityFactory.createForUser(user);
     if (ability.cannot('read', ticket)) {
       throw new ForbiddenException();
@@ -95,7 +95,7 @@ export class TicketsController {
     @Param('seq', ParseIntPipe) seq: number,
     @Body() data: UpdateTicketDto,
   ) {
-    let ticket = await this.ticketsService.findOneBySeqOrFail(org.id, seq);
+    let ticket = await this.ticketService.findOneBySeqOrFail(org.id, seq);
     const ability = this.caslAbilityFactory.createForUser(user);
     if (ability.cannot('update', ticket)) {
       throw new ForbiddenException();
@@ -108,8 +108,8 @@ export class TicketsController {
       }
     });
     if (!_.isEmpty(data)) {
-      await this.ticketsService.update(org.id, ticket.id, data);
-      ticket = await this.ticketsService.findOne(org.id, ticket.id);
+      await this.ticketService.update(org.id, ticket.id, data);
+      ticket = await this.ticketService.findOne(org.id, ticket.id);
     }
     return {
       ticket,
@@ -123,7 +123,7 @@ export class TicketsController {
     @Param('seq', ParseIntPipe) seq: number,
     @Body() data: CreateReplyDto,
   ) {
-    const ticket = await this.ticketsService.findOneBySeqOrFail(org.id, seq);
+    const ticket = await this.ticketService.findOneBySeqOrFail(org.id, seq);
     const ability = this.caslAbilityFactory.createForUser(user);
     if (ability.cannot('read', ticket)) {
       throw new ForbiddenException();
@@ -149,7 +149,7 @@ export class TicketsController {
     @CurrentUser() user: User,
     @Param('seq', ParseIntPipe) seq: number,
   ) {
-    const ticket = await this.ticketsService.findOneBySeqOrFail(org.id, seq);
+    const ticket = await this.ticketService.findOneBySeqOrFail(org.id, seq);
     const ability = this.caslAbilityFactory.createForUser(user);
     if (ability.cannot('read', ticket)) {
       throw new ForbiddenException();

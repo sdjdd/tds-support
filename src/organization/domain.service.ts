@@ -7,21 +7,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateDomainDto } from './dtos/create-domain.dto';
 import { Domain } from './entities/domain.entity';
-import { OrganizationsService } from './organizations.service';
+import { OrganizationService } from './organization.service';
 
 @Injectable()
-export class DomainsService {
+export class DomainService {
   @InjectRepository(Domain)
-  private domainsRepository: Repository<Domain>;
+  private domainRepository: Repository<Domain>;
 
-  constructor(private organizationsService: OrganizationsService) {}
+  constructor(private organizationService: OrganizationService) {}
 
   findOneByDomain(domain: string): Promise<Domain | undefined> {
-    return this.domainsRepository.findOne({ domain });
+    return this.domainRepository.findOne({ domain });
   }
 
   async create(orgId: number, data: CreateDomainDto): Promise<number> {
-    await this.organizationsService.findOneOrFail(orgId);
+    await this.organizationService.findOneOrFail(orgId);
     let domain = await this.findOneByDomain(data.domain);
     if (domain) {
       throw new ConflictException(`domain "${data.domain}" already exists`);
@@ -29,25 +29,25 @@ export class DomainsService {
     domain = new Domain();
     domain.orgId = orgId;
     domain.domain = data.domain;
-    await this.domainsRepository.insert(domain);
+    await this.domainRepository.insert(domain);
     return domain.id;
   }
 
   async find(orgId: number): Promise<Domain[]> {
-    await this.organizationsService.findOneOrFail(orgId);
-    return this.domainsRepository.find({ orgId });
+    await this.organizationService.findOneOrFail(orgId);
+    return this.domainRepository.find({ orgId });
   }
 
   findOne(orgId: number, id: number): Promise<Domain | undefined> {
-    return this.domainsRepository.findOne({ orgId, id });
+    return this.domainRepository.findOne({ orgId, id });
   }
 
   async delete(orgId: number, id: number) {
-    await this.organizationsService.findOneOrFail(orgId);
-    const domain = await this.domainsRepository.findOne({ orgId, id });
+    await this.organizationService.findOneOrFail(orgId);
+    const domain = await this.domainRepository.findOne({ orgId, id });
     if (!domain) {
       throw new NotFoundException(`domain ${id} does not exist`);
     }
-    await this.domainsRepository.delete({ orgId, id });
+    await this.domainRepository.delete({ orgId, id });
   }
 }

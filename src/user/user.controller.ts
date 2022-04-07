@@ -15,27 +15,27 @@ import {
 } from '@nestjs/common';
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { AuthGuard, CurrentUser, Org } from '@/common';
-import { Organization } from '@/organizations';
-import { TicketsService } from '@/tickets';
-import { FindTicketsDto } from '@/tickets/dtos/find-tickets.dto';
+import { Organization } from '@/organization';
+import { TicketService } from '@/ticket';
+import { FindTicketsDto } from '@/ticket/dtos/find-tickets.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { FindUsersParams } from './dtos/find-users-params.dto';
 
 @Controller('users')
 @UsePipes(ZodValidationPipe)
-export class UsersController {
-  @Inject(forwardRef(() => TicketsService))
-  private ticketsService: TicketsService;
+export class UserController {
+  @Inject(forwardRef(() => TicketService))
+  private ticketService: TicketService;
 
-  constructor(private usersService: UsersService) {}
+  constructor(private userService: UserService) {}
 
   @Post()
   async create(@Org() org: Organization, @Body() data: CreateUserDto) {
-    const id = await this.usersService.create(org.id, data);
-    const user = await this.usersService.findOne(org.id, id);
+    const id = await this.userService.create(org.id, data);
+    const user = await this.userService.findOne(org.id, id);
     return {
       user,
     };
@@ -57,8 +57,8 @@ export class UsersController {
         throw new ForbiddenException();
       }
     }
-    await this.usersService.update(org.id, id, data);
-    const user = await this.usersService.findOne(org.id, id);
+    await this.userService.update(org.id, id, data);
+    const user = await this.userService.findOne(org.id, id);
     return {
       user,
     };
@@ -76,7 +76,7 @@ export class UsersController {
         throw new ForbiddenException();
       }
     }
-    return this.usersService.findOneOrFail(org.id, id);
+    return this.userService.findOneOrFail(org.id, id);
   }
 
   @Get(':id/tickets/requested')
@@ -91,9 +91,9 @@ export class UsersController {
       if (!user.isAgent()) {
         throw new ForbiddenException();
       }
-      await this.usersService.findOneOrFail(org.id, id);
+      await this.userService.findOneOrFail(org.id, id);
     }
-    const tickets = await this.ticketsService.find(org.id, {
+    const tickets = await this.ticketService.find(org.id, {
       ...(params as any),
       requesterId: id,
     });
@@ -114,9 +114,9 @@ export class UsersController {
       throw new ForbiddenException();
     }
     if (id !== user.id) {
-      await this.usersService.findOneOrFail(org.id, id);
+      await this.userService.findOneOrFail(org.id, id);
     }
-    const tickets = await this.ticketsService.find(org.id, {
+    const tickets = await this.ticketService.find(org.id, {
       ...(params as any),
       assigneeId: id,
     });
@@ -135,7 +135,7 @@ export class UsersController {
     if (!currentUser.isAgent()) {
       throw new ForbiddenException();
     }
-    const users = await this.usersService.find(org.id, params);
+    const users = await this.userService.find(org.id, params);
     return {
       users,
     };

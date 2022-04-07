@@ -12,15 +12,15 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { FindUsersParams } from './dtos/find-users-params.dto';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   @InjectRepository(User)
-  private usersRepository: Repository<User>;
+  private userRepository: Repository<User>;
 
   find(
     orgId: number,
     { page, pageSize, role }: FindUsersParams,
   ): Promise<User[]> {
-    const qb = this.usersRepository
+    const qb = this.userRepository
       .createQueryBuilder('user')
       .where('user.orgId = :orgId', { orgId });
 
@@ -40,7 +40,7 @@ export class UsersService {
   }
 
   findOne(orgId: number, id: number): Promise<User | undefined> {
-    return this.usersRepository.findOne({ orgId, id });
+    return this.userRepository.findOne({ orgId, id });
   }
 
   async findOneOrFail(orgId: number, id: number): Promise<User> {
@@ -55,18 +55,18 @@ export class UsersService {
     orgId: number,
     username: string,
   ): Promise<User | undefined> {
-    return this.usersRepository.findOne({ orgId, username });
+    return this.userRepository.findOne({ orgId, username });
   }
 
   findOneByEmail(orgId: number, email: string): Promise<User | undefined> {
-    return this.usersRepository.findOne({ orgId, email });
+    return this.userRepository.findOne({ orgId, email });
   }
 
   findOneByUsernameAndSelectPassword(
     orgId: number,
     username: string,
   ): Promise<User | undefined> {
-    return this.usersRepository
+    return this.userRepository
       .createQueryBuilder('user')
       .addSelect('user.password')
       .where('user.orgId = :orgId', { orgId })
@@ -99,7 +99,7 @@ export class UsersService {
     await user.setPassword(data.password);
     user.email = data.email;
     user.role = 'end-user';
-    await this.usersRepository.insert(user);
+    await this.userRepository.insert(user);
     return user.id;
   }
 
@@ -111,6 +111,6 @@ export class UsersService {
     if (data.email && data.email !== user.email) {
       await this.assertNoEmailConflict(orgId, data.email);
     }
-    await this.usersRepository.update({ orgId, id }, data);
+    await this.userRepository.update({ orgId, id }, data);
   }
 }

@@ -13,23 +13,23 @@ import { Category } from './entities/category.entity';
 import { BatchUpdateCategoryDto } from './dtos/batch-update-category.dto';
 
 @Injectable()
-export class CategoriesService {
+export class CategoryService {
   @InjectConnection()
   private connection: Connection;
 
   @InjectRepository(Category)
-  private categoriesRepository: Repository<Category>;
+  private categoryRepository: Repository<Category>;
 
   find(orgId: number): Promise<Category[]> {
-    return this.categoriesRepository.find({ orgId });
+    return this.categoryRepository.find({ orgId });
   }
 
   findByIds(orgId: number, ids: number[]): Promise<Category[]> {
-    return this.categoriesRepository.find({ orgId, id: In(ids) });
+    return this.categoryRepository.find({ orgId, id: In(ids) });
   }
 
   findOne(orgId: number, id: number): Promise<Category | undefined> {
-    return this.categoriesRepository.findOne({ orgId, id });
+    return this.categoryRepository.findOne({ orgId, id });
   }
 
   async findOneOrFail(orgId: number, id: number): Promise<Category> {

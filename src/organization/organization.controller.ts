@@ -15,8 +15,8 @@ import { MasterKeyGuard } from '@/common';
 import { CreateOrganizationDto } from './dtos/create-organization.dto';
 import { CreateDomainDto } from './dtos/create-domain.dto';
 import { UpdateOrganizationDto } from './dtos/update-organization.dto';
-import { OrganizationsService } from './organizations.service';
-import { DomainsService } from './domains.service';
+import { OrganizationService } from './organization.service';
+import { DomainService } from './domain.service';
 
 @Controller({
   host: process.env.ADMIN_DOMAIN,
@@ -24,16 +24,16 @@ import { DomainsService } from './domains.service';
 })
 @UseGuards(MasterKeyGuard)
 @UsePipes(ZodValidationPipe)
-export class OrganizationsController {
+export class OrganizationController {
   constructor(
-    private organizationsService: OrganizationsService,
-    private domainsService: DomainsService,
+    private organizationService: OrganizationService,
+    private domainService: DomainService,
   ) {}
 
   @Post()
   async create(@Body() data: CreateOrganizationDto) {
-    const id = await this.organizationsService.create(data);
-    const organization = await this.organizationsService.findOne(id);
+    const id = await this.organizationService.create(data);
+    const organization = await this.organizationService.findOne(id);
     return {
       organization,
     };
@@ -41,7 +41,7 @@ export class OrganizationsController {
 
   @Get()
   async find() {
-    const organizations = await this.organizationsService.find();
+    const organizations = await this.organizationService.find();
     return {
       organizations,
     };
@@ -49,7 +49,7 @@ export class OrganizationsController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const organization = await this.organizationsService.findOneOrFail(id);
+    const organization = await this.organizationService.findOneOrFail(id);
     return {
       organization,
     };
@@ -60,8 +60,8 @@ export class OrganizationsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateOrganizationDto,
   ) {
-    await this.organizationsService.update(id, data);
-    const organization = await this.organizationsService.findOne(id);
+    await this.organizationService.update(id, data);
+    const organization = await this.organizationService.findOne(id);
     return {
       organization,
     };
@@ -69,7 +69,7 @@ export class OrganizationsController {
 
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    await this.organizationsService.softDelete(id);
+    await this.organizationService.softDelete(id);
   }
 
   @Post(':orgId/domains')
@@ -77,8 +77,8 @@ export class OrganizationsController {
     @Param('orgId') orgId: number,
     @Body() data: CreateDomainDto,
   ) {
-    const id = await this.domainsService.create(orgId, data);
-    const domain = await this.domainsService.findOne(orgId, id);
+    const id = await this.domainService.create(orgId, data);
+    const domain = await this.domainService.findOne(orgId, id);
     return {
       domain,
     };
@@ -86,7 +86,7 @@ export class OrganizationsController {
 
   @Get(':orgId/domains')
   async findDomains(@Param('orgId') orgId: number) {
-    const domains = await this.domainsService.find(orgId);
+    const domains = await this.domainService.find(orgId);
     return {
       domains,
     };
@@ -97,6 +97,6 @@ export class OrganizationsController {
     @Param('orgId') orgId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    await this.domainsService.delete(orgId, id);
+    await this.domainService.delete(orgId, id);
   }
 }

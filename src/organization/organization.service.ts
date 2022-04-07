@@ -11,9 +11,9 @@ import { UpdateOrganizationDto } from './dtos/update-organization.dto';
 import { Organization } from './entities/organization.entity';
 
 @Injectable()
-export class OrganizationsService {
+export class OrganizationService {
   @InjectRepository(Organization)
-  private organizationsRepository: Repository<Organization>;
+  private organizationRepository: Repository<Organization>;
 
   private async assertNoSubdomainConflict(subdomain: string) {
     const organization = await this.findOneBySubdomain(subdomain);
@@ -32,16 +32,16 @@ export class OrganizationsService {
     organization.description = data.description ?? '';
     organization.subdomain = data.subdomain;
 
-    await this.organizationsRepository.insert(organization);
+    await this.organizationRepository.insert(organization);
     return organization.id;
   }
 
   find(): Promise<Organization[]> {
-    return this.organizationsRepository.find();
+    return this.organizationRepository.find();
   }
 
   findOne(id: number): Promise<Organization | undefined> {
-    return this.organizationsRepository.findOne(id);
+    return this.organizationRepository.findOne(id);
   }
 
   async findOneOrFail(id: number): Promise<Organization> {
@@ -53,7 +53,7 @@ export class OrganizationsService {
   }
 
   findOneBySubdomain(subdomain: string): Promise<Organization | undefined> {
-    return this.organizationsRepository.findOne({ subdomain });
+    return this.organizationRepository.findOne({ subdomain });
   }
 
   async update(id: number, data: UpdateOrganizationDto) {
@@ -64,11 +64,11 @@ export class OrganizationsService {
     if (data.subdomain && organization.subdomain !== data.subdomain) {
       await this.assertNoSubdomainConflict(data.subdomain);
     }
-    await this.organizationsRepository.update(id, data);
+    await this.organizationRepository.update(id, data);
   }
 
   async softDelete(id: number) {
     await this.findOneOrFail(id);
-    await this.organizationsRepository.softDelete(id);
+    await this.organizationRepository.softDelete(id);
   }
 }

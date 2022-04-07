@@ -9,11 +9,11 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth';
 import { CacheModule } from './cache';
 import { DatabaseModule } from './database';
-import { OrganizationsModule } from './organizations';
-import { UsersModule } from './users';
-import { CategoriesModule } from './categories';
+import { OrganizationModule } from './organization';
+import { UserModule } from './user';
+import { CategoryModule } from './category';
 import { SequenceModule } from './sequence';
-import { TicketsModule } from './tickets';
+import { TicketModule } from './ticket';
 
 @Module({
   imports: [
@@ -32,11 +32,11 @@ import { TicketsModule } from './tickets';
     CacheModule,
     DatabaseModule,
     AuthModule,
-    OrganizationsModule,
-    UsersModule,
-    CategoriesModule,
+    OrganizationModule,
+    UserModule,
+    CategoryModule,
     SequenceModule,
-    TicketsModule,
+    TicketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

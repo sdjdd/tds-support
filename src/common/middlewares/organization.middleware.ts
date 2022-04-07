@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware, NotFoundException } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { Organization, OrganizationsService } from '@/organizations';
+import { Organization, OrganizationService } from '@/organization';
 
 declare module 'express' {
   interface Request {
@@ -12,7 +12,7 @@ declare module 'express' {
 export class OrganizationMiddleware implements NestMiddleware {
   private adminDomain?: string;
 
-  constructor(private organizationsService: OrganizationsService) {
+  constructor(private organizationService: OrganizationService) {
     this.adminDomain = process.env.ADMIN_DOMAIN;
   }
 
@@ -23,7 +23,7 @@ export class OrganizationMiddleware implements NestMiddleware {
         throw new NotFoundException();
       }
       const subdomain = subdomains[subdomains.length - 1];
-      const organization = await this.organizationsService.findOneBySubdomain(
+      const organization = await this.organizationService.findOneBySubdomain(
         subdomain,
       );
       if (!organization) {
