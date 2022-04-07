@@ -31,7 +31,7 @@ export interface FindTicketsOptions {
 @Injectable()
 export class TicketService {
   @InjectRepository(Ticket)
-  private ticketsRepository: Repository<Ticket>;
+  private ticketRepository: Repository<Ticket>;
 
   @Inject(forwardRef(() => UserService))
   private userService: UserService;
@@ -55,7 +55,7 @@ export class TicketService {
       orderBy,
     }: FindTicketsOptions,
   ): Promise<Ticket[]> {
-    const qb = this.ticketsRepository.createQueryBuilder('ticket');
+    const qb = this.ticketRepository.createQueryBuilder('ticket');
     qb.select([
       'ticket.seq',
       'ticket.categoryId',
@@ -84,11 +84,11 @@ export class TicketService {
   }
 
   findOne(orgId: number, id: number): Promise<Ticket | undefined> {
-    return this.ticketsRepository.findOne({ orgId, id });
+    return this.ticketRepository.findOne({ orgId, id });
   }
 
   findOneBySeq(orgId: number, seq: number): Promise<Ticket | undefined> {
-    return this.ticketsRepository.findOne({ orgId, seq });
+    return this.ticketRepository.findOne({ orgId, seq });
   }
 
   async findOneBySeqOrFail(orgId: number, seq: number): Promise<Ticket> {
@@ -114,7 +114,7 @@ export class TicketService {
     ticket.htmlContent = this.markdownService.render(data.content);
     ticket.replyCount = 0;
 
-    await this.ticketsRepository.insert(ticket);
+    await this.ticketRepository.insert(ticket);
 
     const jobData: CreateSearchDocData = {
       id: ticket.id,
@@ -136,7 +136,7 @@ export class TicketService {
       await this.assertAssigneeIdIsValid(orgId, data.assigneeId);
     }
 
-    await this.ticketsRepository.update(id, data);
+    await this.ticketRepository.update(id, data);
 
     const jobData: UpdateSearchDocData = {
       id,
