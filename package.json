@@ -37,6 +37,7 @@
     "argon2": "^0.28.5",
     "bull": "^4.8.1",
     "cache-manager": "^3.6.0",
+    "chevrotain": "^10.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "dompurify": "^2.3.6",
