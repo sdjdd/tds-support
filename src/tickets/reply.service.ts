@@ -29,6 +29,7 @@ export class ReplyService {
     reply.public = data.public ?? true;
     reply.content = data.content;
     reply.htmlContent = this.markdownService.render(data.content);
+
     await this.connection.transaction(async (manager) => {
       await manager.insert(Reply, reply);
       await manager.update(
@@ -39,6 +40,7 @@ export class ReplyService {
         },
       );
     });
+
     return reply.id;
   }
 

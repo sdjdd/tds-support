@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { OrganizationMiddleware } from './common';
 import { cacheConfig, queueConfig, sequenceConfig } from './config/redis';
+import { elasticsearchConfig } from './config/elasticsearch';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth';
@@ -18,7 +19,7 @@ import { TicketsModule } from './tickets';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [cacheConfig, queueConfig, sequenceConfig],
+      load: [cacheConfig, queueConfig, sequenceConfig, elasticsearchConfig],
     }),
     BullModule.forRootAsync({
       inject: [ConfigService],

@@ -18,6 +18,7 @@ import { status } from './constants';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
+import { CreateSearchDocData, UpdateSearchDocData } from './types';
 
 export interface FindTicketsOptions {
   requesterId?: number;
@@ -42,7 +43,9 @@ export class TicketsService {
     private categoriesService: CategoriesService,
     private markdownService: MarkdownService,
     private sequenceService: SequenceService,
-    @InjectQueue('sync-to-es') private syncToEsQueue: Queue,
+
+    @InjectQueue('search-index-ticket')
+    private searchIndexQueue: Queue,
   ) {}
 
   async find(
@@ -114,27 +117,35 @@ export class TicketsService {
     ticket.htmlContent = this.markdownService.render(data.content);
     ticket.replyCount = 0;
 
-    await this.connection.transaction(async (manager) => {
-      await manager.insert(Ticket, ticket);
-      await this.syncToEsQueue.add('ticket', {
-        id: ticket.id,
-      });
-    });
+    await this.ticketsRepository.insert(ticket);
+
+    const jobData: CreateSearchDocData = {
+      id: ticket.id,
+    };
+    await this.searchIndexQueue.add('create', jobData);
 
     return ticket.id;
   }
 
-  async update(orgId: number, seq: number, data: UpdateTicketDto) {
+  async update(orgId: number, id: number, data: UpdateTicketDto) {
     if (_.isEmpty(data)) {
       return;
     }
+
     if (data.categoryId) {
       await this.categoriesService.findOneOrFail(orgId, data.categoryId);
     }
     if (data.assigneeId) {
       await this.assertAssigneeIdIsValid(orgId, data.assigneeId);
     }
-    await this.ticketsRepository.update({ orgId, seq }, data);
+
+    await this.ticketsRepository.update(id, data);
+
+    const jobData: UpdateSearchDocData = {
+      id,
+      fields: Object.keys(data),
+    };
+    await this.searchIndexQueue.add('update', jobData);
   }
 
   private getNextSequence(orgId: number) {
