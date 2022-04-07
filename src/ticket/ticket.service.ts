@@ -63,7 +63,6 @@ export class TicketService {
       'ticket.assigneeId',
       'ticket.title',
       'ticket.status',
-      'ticket.replyCount',
       'ticket.createdAt',
       'ticket.updatedAt',
     ]);
@@ -112,7 +111,6 @@ export class TicketService {
     ticket.title = data.title;
     ticket.content = data.content;
     ticket.htmlContent = this.markdownService.render(data.content);
-    ticket.replyCount = 0;
 
     await this.ticketRepository.insert(ticket);
 
@@ -138,11 +136,17 @@ export class TicketService {
 
     await this.ticketRepository.update(id, data);
 
-    const jobData: UpdateSearchDocData = {
+    await this.addUpdateSearchIndexJob({
       id,
       fields: Object.keys(data),
-    };
-    await this.searchIndexQueue.add('update', jobData);
+    });
+  }
+
+  async addUpdateSearchIndexJob(jobData: UpdateSearchDocData) {
+    await this.searchIndexQueue.add('update', jobData, {
+      attempts: 3,
+      backoff: 1000,
+    });
   }
 
   private getNextSequence(orgId: number) {

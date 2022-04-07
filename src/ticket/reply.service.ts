@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { MarkdownService } from '@/markdown';
 import { Reply } from './entities/reply.entity';
-import { Ticket } from './entities/ticket.entity';
 import { CreateReplyDto } from './dtos/create-reply.dto';
 
 @Injectable()
 export class ReplyService {
-  @InjectConnection()
-  private connection: Connection;
-
   @InjectRepository(Reply)
   private replyRepository: Repository<Reply>;
 
@@ -30,16 +26,7 @@ export class ReplyService {
     reply.content = data.content;
     reply.htmlContent = this.markdownService.render(data.content);
 
-    await this.connection.transaction(async (manager) => {
-      await manager.insert(Reply, reply);
-      await manager.update(
-        Ticket,
-        { orgId, id: ticketId },
-        {
-          replyCount: () => 'reply_count + 1',
-        },
-      );
-    });
+    await this.replyRepository.insert(reply);
 
     return reply.id;
   }

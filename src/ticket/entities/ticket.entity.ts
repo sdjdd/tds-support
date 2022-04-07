@@ -38,10 +38,6 @@ export class Ticket {
   @Expose()
   htmlContent: string;
 
-  @Column({ name: 'reply_count' })
-  @Expose()
-  replyCount: number;
-
   @Column()
   @Expose()
   status: number;
