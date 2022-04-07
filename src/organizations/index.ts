@@ -1,3 +1,3 @@
 export { Organization } from './entities/organization.entity';
-export { OrganizationsModule } from './organizations.module';
-export { OrganizationsService } from './organizations.service';
+export { OrganizationsModule } from './organization.module';
+export { OrganizationService } from './organization.service';

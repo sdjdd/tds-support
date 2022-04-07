@@ -3,16 +3,16 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Organization } from './entities/organization.entity';
-import { OrganizationsService } from './organizations.service';
+import { OrganizationService } from './organization.service';
 
 describe('OrganizationsService', () => {
-  let organizationsRepository: Repository<Organization>;
-  let organizationsService: OrganizationsService;
+  let organizationRepository: Repository<Organization>;
+  let organizationService: OrganizationService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
-        OrganizationsService,
+        OrganizationService,
         {
           provide: getRepositoryToken(Organization),
           useValue: {
@@ -26,18 +26,18 @@ describe('OrganizationsService', () => {
       ],
     }).compile();
 
-    organizationsRepository = module.get(getRepositoryToken(Organization));
-    organizationsService = module.get(OrganizationsService);
+    organizationRepository = module.get(getRepositoryToken(Organization));
+    organizationService = module.get(OrganizationService);
   });
 
   describe('create', () => {
     it('should insert organization', async () => {
-      await organizationsService.create({
+      await organizationService.create({
         name: 'org-name',
         description: 'org-desc',
         subdomain: 'support',
       });
-      expect(organizationsRepository.insert).toBeCalledWith({
+      expect(organizationRepository.insert).toBeCalledWith({
         name: 'org-name',
         description: 'org-desc',
         subdomain: 'support',
@@ -45,10 +45,10 @@ describe('OrganizationsService', () => {
     });
 
     it('should set default values', async () => {
-      await organizationsService.create({
+      await organizationService.create({
         name: 'org-name',
       });
-      expect(organizationsRepository.insert).toBeCalledWith({
+      expect(organizationRepository.insert).toBeCalledWith({
         name: 'org-name',
         description: '',
       });
@@ -56,10 +56,10 @@ describe('OrganizationsService', () => {
 
     it('should throw when subdomain already exists', async () => {
       jest
-        .spyOn(organizationsService, 'findOneBySubdomain')
+        .spyOn(organizationService, 'findOneBySubdomain')
         .mockResolvedValue(new Organization());
       await expect(
-        organizationsService.create({
+        organizationService.create({
           name: 'org-name',
           description: 'org-desc',
           subdomain: 'support',
@@ -70,14 +70,14 @@ describe('OrganizationsService', () => {
 
   describe('find', () => {
     it('should find organizations', async () => {
-      await organizationsService.find();
-      expect(organizationsRepository.find).toHaveBeenCalled();
+      await organizationService.find();
+      expect(organizationRepository.find).toHaveBeenCalled();
     });
   });
 
   describe('findOrFail', () => {
     it('should throw when organization not exists', async () => {
-      await expect(organizationsService.findOneOrFail(1)).rejects.toThrow(
+      await expect(organizationService.findOneOrFail(1)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -86,14 +86,14 @@ describe('OrganizationsService', () => {
   describe('update', () => {
     it('should update organization', async () => {
       jest
-        .spyOn(organizationsRepository, 'findOne')
+        .spyOn(organizationRepository, 'findOne')
         .mockResolvedValueOnce(new Organization());
-      await organizationsService.update(1, {
+      await organizationService.update(1, {
         name: 'new-org-name',
         description: 'new-org-desc',
         subdomain: 'new-subdomain',
       });
-      expect(organizationsRepository.update).toBeCalledWith(1, {
+      expect(organizationRepository.update).toBeCalledWith(1, {
         name: 'new-org-name',
         description: 'new-org-desc',
         subdomain: 'new-subdomain',
@@ -102,7 +102,7 @@ describe('OrganizationsService', () => {
 
     it('should throw when organization not exists', async () => {
       await expect(
-        organizationsService.update(1, {
+        organizationService.update(1, {
           name: 'new-org-name',
           description: 'new-org-desc',
         }),
@@ -111,13 +111,13 @@ describe('OrganizationsService', () => {
 
     it('should throw when subdomain already exists', async () => {
       jest
-        .spyOn(organizationsRepository, 'findOne')
+        .spyOn(organizationRepository, 'findOne')
         .mockResolvedValueOnce(new Organization());
       jest
-        .spyOn(organizationsService, 'findOneBySubdomain')
+        .spyOn(organizationService, 'findOneBySubdomain')
         .mockResolvedValue(new Organization());
       await expect(
-        organizationsService.update(1, {
+        organizationService.update(1, {
           subdomain: 'some-subdomain',
         }),
       ).rejects.toThrow(ConflictException);
@@ -127,13 +127,13 @@ describe('OrganizationsService', () => {
       const organization = new Organization();
       organization.subdomain = 'some-subdomain';
       jest
-        .spyOn(organizationsRepository, 'findOne')
+        .spyOn(organizationRepository, 'findOne')
         .mockResolvedValueOnce(organization);
       jest
-        .spyOn(organizationsService, 'findOneBySubdomain')
+        .spyOn(organizationService, 'findOneBySubdomain')
         .mockResolvedValue(new Organization());
       await expect(
-        organizationsService.update(1, {
+        organizationService.update(1, {
           subdomain: 'some-subdomain',
         }),
       ).resolves.not.toThrowError();
@@ -143,14 +143,14 @@ describe('OrganizationsService', () => {
   describe('softDelete', () => {
     it('should soft delete organization', async () => {
       jest
-        .spyOn(organizationsRepository, 'findOne')
+        .spyOn(organizationRepository, 'findOne')
         .mockResolvedValueOnce(new Organization());
-      await organizationsService.softDelete(1);
-      expect(organizationsRepository.softDelete).toBeCalledWith(1);
+      await organizationService.softDelete(1);
+      expect(organizationRepository.softDelete).toBeCalledWith(1);
     });
 
     it('should throw when organization not exists', async () => {
-      await expect(organizationsService.softDelete(1)).rejects.toThrow(
+      await expect(organizationService.softDelete(1)).rejects.toThrow(
         NotFoundException,
       );
     });

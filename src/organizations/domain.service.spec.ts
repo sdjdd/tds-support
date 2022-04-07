@@ -3,18 +3,18 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Domain } from './entities/domain.entity';
-import { OrganizationsService } from './organizations.service';
+import { OrganizationService } from './organization.service';
 import { DomainService } from './domain.service';
 
 describe('DomainsService', () => {
   let domainService: DomainService;
   let domainRepository: Repository<Domain>;
-  let organizationService: OrganizationsService;
+  let organizationService: OrganizationService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
-        OrganizationsService,
+        OrganizationService,
         DomainService,
         {
           provide: getRepositoryToken(Domain),
@@ -26,7 +26,7 @@ describe('DomainsService', () => {
           },
         },
         {
-          provide: OrganizationsService,
+          provide: OrganizationService,
           useValue: {
             findOneOrFail: jest.fn(),
           },
@@ -36,7 +36,7 @@ describe('DomainsService', () => {
 
     domainService = module.get(DomainService);
     domainRepository = module.get(getRepositoryToken(Domain));
-    organizationService = module.get(OrganizationsService);
+    organizationService = module.get(OrganizationService);
   });
 
   describe('findOneByDomain', () => {

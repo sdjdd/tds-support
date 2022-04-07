@@ -7,21 +7,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateDomainDto } from './dtos/create-domain.dto';
 import { Domain } from './entities/domain.entity';
-import { OrganizationsService } from './organizations.service';
+import { OrganizationService } from './organization.service';
 
 @Injectable()
 export class DomainService {
   @InjectRepository(Domain)
   private domainRepository: Repository<Domain>;
 
-  constructor(private organizationsService: OrganizationsService) {}
+  constructor(private organizationService: OrganizationService) {}
 
   findOneByDomain(domain: string): Promise<Domain | undefined> {
     return this.domainRepository.findOne({ domain });
   }
 
   async create(orgId: number, data: CreateDomainDto): Promise<number> {
-    await this.organizationsService.findOneOrFail(orgId);
+    await this.organizationService.findOneOrFail(orgId);
     let domain = await this.findOneByDomain(data.domain);
     if (domain) {
       throw new ConflictException(`domain "${data.domain}" already exists`);
@@ -34,7 +34,7 @@ export class DomainService {
   }
 
   async find(orgId: number): Promise<Domain[]> {
-    await this.organizationsService.findOneOrFail(orgId);
+    await this.organizationService.findOneOrFail(orgId);
     return this.domainRepository.find({ orgId });
   }
 
@@ -43,7 +43,7 @@ export class DomainService {
   }
 
   async delete(orgId: number, id: number) {
-    await this.organizationsService.findOneOrFail(orgId);
+    await this.organizationService.findOneOrFail(orgId);
     const domain = await this.domainRepository.findOne({ orgId, id });
     if (!domain) {
       throw new NotFoundException(`domain ${id} does not exist`);
