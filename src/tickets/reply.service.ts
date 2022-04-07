@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
-import { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
 import { MarkdownService } from '@/markdown';
 import { Reply } from './entities/reply.entity';
 import { Ticket } from './entities/ticket.entity';
 import { CreateReplyDto } from './dtos/create-reply.dto';
-import { UpdateSearchDocData } from './types';
 
 @Injectable()
 export class ReplyService {
@@ -17,11 +14,7 @@ export class ReplyService {
   @InjectRepository(Reply)
   private replyRepository: Repository<Reply>;
 
-  constructor(
-    private markdownService: MarkdownService,
-    @InjectQueue('search-index-ticket')
-    private searchIndexQueue: Queue,
-  ) {}
+  constructor(private markdownService: MarkdownService) {}
 
   async create(
     orgId: number,
@@ -47,12 +40,6 @@ export class ReplyService {
         },
       );
     });
-
-    const jobData: UpdateSearchDocData = {
-      id: ticketId,
-      fields: ['replyCount'],
-    };
-    await this.searchIndexQueue.add('update', jobData);
 
     return reply.id;
   }

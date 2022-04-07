@@ -115,7 +115,6 @@ export class SyncProcessor {
       assigneeId: ticket.assigneeId,
       title: ticket.title,
       content: ticket.content,
-      replyCount: ticket.replyCount,
       status: ticket.status,
       createdAt: ticket.createdAt,
       updatedAt: ticket.updatedAt,

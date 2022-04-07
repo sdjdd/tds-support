@@ -11,7 +11,7 @@ async function main() {
     index: 'ticket',
     body: {
       mappings: {
-        dynamic: false,
+        dynamic: 'strict',
         properties: {
           id: {
             type: 'long',
@@ -40,9 +40,6 @@ async function main() {
             type: 'text',
             analyzer: 'ik_max_word',
             search_analyzer: 'ik_smart',
-          },
-          replyCount: {
-            type: 'integer',
           },
           status: {
             type: 'short',
