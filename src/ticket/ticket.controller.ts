@@ -101,7 +101,7 @@ export class TicketController {
     const body = esb.requestBodySearch();
     const boolQuery = esb
       .boolQuery()
-      .filter(esb.matchQuery('orgId', org.id as any));
+      .filter(esb.matchQuery('orgId', org.id.toString()));
 
     const addMatchQuery = (field: string, values: string[]) => {
       const inner = esb.boolQuery();
@@ -166,8 +166,6 @@ export class TicketController {
       .query(boolQuery)
       .from((page - 1) * pageSize)
       .size(pageSize);
-
-    console.dir(body.toJSON(), { depth: 114514 });
 
     if (orderBy) {
       body.sort(esb.sort(orderBy[0], orderBy[1]));
