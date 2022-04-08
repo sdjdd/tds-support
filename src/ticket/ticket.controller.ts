@@ -88,6 +88,7 @@ export class TicketController {
   @Get('search')
   async search(
     @Org() org: Organization,
+    @CurrentUser() user: User,
     @Query('filter', ParseFilterPipe) filter: ParseFilterResult,
     @Query(
       'orderBy',
@@ -97,6 +98,10 @@ export class TicketController {
     @Query('page', ParsePagePipe) page: number,
     @Query('pageSize', ParsePageSizePipe) pageSize: number,
   ) {
+    if (!user.isAgent()) {
+      throw new ForbiddenException();
+    }
+
     const { properties, terms } = filter;
     const body = esb.requestBodySearch();
     const boolQuery = esb
