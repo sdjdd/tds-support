@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
@@ -102,6 +103,12 @@ export class TicketController {
       throw new ForbiddenException();
     }
 
+    const skip = (page - 1) * pageSize;
+    if (skip + pageSize >= 10000) {
+      // See: https://www.elastic.co/guide/en/elasticsearch/reference/7.9/index-modules.html#index-max-result-window
+      throw new BadRequestException('cannot skip more than 10000 results');
+    }
+
     const { properties, terms } = filter;
     const body = esb.requestBodySearch();
     const boolQuery = esb
@@ -167,10 +174,7 @@ export class TicketController {
       });
     }
 
-    body
-      .query(boolQuery)
-      .from((page - 1) * pageSize)
-      .size(pageSize);
+    body.query(boolQuery).from(skip).size(pageSize);
 
     if (orderBy) {
       body.sort(esb.sort(orderBy[0], orderBy[1]));
