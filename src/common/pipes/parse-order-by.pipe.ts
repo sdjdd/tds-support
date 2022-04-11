@@ -7,13 +7,13 @@ import {
 export class ParseOrderByPipe implements PipeTransform {
   private avaliableKeys: string[];
 
-  constructor(keys: string[]) {
+  constructor(keys: string[], private defaultKey: string) {
     this.avaliableKeys = [...keys, ...keys.map((key) => '-' + key)];
   }
 
   transform(value: string | undefined, metadata: ArgumentMetadata) {
     if (!value) {
-      return undefined;
+      return [this.defaultKey, 'ASC'];
     }
     if (!this.avaliableKeys.includes(value)) {
       throw new BadRequestException(

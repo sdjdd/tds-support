@@ -93,9 +93,9 @@ export class TicketController {
     @Query('filter', ParseFilterPipe) filter: ParseFilterResult,
     @Query(
       'orderBy',
-      new ParseOrderByPipe(['status', 'createdAt', 'updatedAt']),
+      new ParseOrderByPipe(['status', 'createdAt', 'updatedAt'], 'id'),
     )
-    orderBy: [string, 'ASC' | 'DESC'] | undefined,
+    orderBy: [string, 'ASC' | 'DESC'],
     @Query('page', ParsePagePipe) page: number,
     @Query('pageSize', ParsePageSizePipe) pageSize: number,
   ) {
