@@ -18,15 +18,11 @@ import { status } from './constants';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
-import { CreateSearchDocData, UpdateSearchDocData } from './types';
-
-export interface FindTicketsOptions {
-  requesterId?: number;
-  assigneeId?: number;
-  page?: number;
-  pageSize?: number;
-  orderBy?: ['seq' | 'status' | 'createdAt', 'ASC' | 'DESC'];
-}
+import {
+  CreateSearchDocData,
+  FindTicketsOptions,
+  UpdateSearchDocData,
+} from './types';
 
 @Injectable()
 export class TicketService {
