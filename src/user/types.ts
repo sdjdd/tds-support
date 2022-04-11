@@ -1,3 +1,6 @@
-import { USER_ROLES } from './constants';
-
-export type UserRole = typeof USER_ROLES[number];
+export enum UserRole {
+  EndUser = 1,
+  LiteAgent = 2,
+  Agent = 3,
+  Admin = 4,
+}

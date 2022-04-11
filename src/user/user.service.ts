@@ -10,6 +10,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { FindUsersParams } from './dtos/find-users-params.dto';
+import { UserRole } from './types';
 
 @Injectable()
 export class UserService {
@@ -98,7 +99,7 @@ export class UserService {
     user.username = data.username;
     await user.setPassword(data.password);
     user.email = data.email;
-    user.role = 'end-user';
+    user.role = UserRole.EndUser;
     await this.userRepository.insert(user);
     return user.id;
   }
