@@ -25,7 +25,6 @@ export class User {
   email: string;
 
   @Column()
-  @Expose()
   role: UserRole;
 
   @Column({ name: 'created_at' })
@@ -48,10 +47,24 @@ export class User {
   }
 
   isAdmin() {
-    return this.role === 'admin';
+    return this.role === UserRole.Admin;
   }
 
   isAgent() {
-    return this.isAdmin() || this.role === 'agent';
+    return this.isAdmin() || this.role === UserRole.Agent;
+  }
+
+  @Expose({ name: 'role' })
+  getRoleName() {
+    switch (this.role) {
+      case UserRole.EndUser:
+        return 'end-user';
+      case UserRole.LiteAgent:
+        return 'lite-agent';
+      case UserRole.Agent:
+        return 'agent';
+      case UserRole.Admin:
+        return 'admin';
+    }
   }
 }
