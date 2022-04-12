@@ -83,12 +83,12 @@ export class CategoryService {
     }
 
     await this.connection.transaction(async (manager) => {
-      for (const data of datas) {
+      for (const { id, ...data } of datas) {
         try {
-          await this.updateByEntityManager(manager, orgId, data.id, data);
+          await this.updateByEntityManager(manager, orgId, id, data);
         } catch (error) {
           throw new BadRequestException(
-            `failed to update category ${data.id}: ${error.message}`,
+            `failed to update category ${id}: ${error.message}`,
           );
         }
       }
