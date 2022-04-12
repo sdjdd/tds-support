@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import _ from 'lodash';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -49,6 +49,15 @@ export class UserService {
       .take(pageSize)
       .orderBy('user.id')
       .getMany();
+  }
+
+  findByIds(orgId: number, ids: number[]): Promise<User[]> {
+    return this.userRepository.find({
+      where: {
+        orgId,
+        id: In(ids),
+      },
+    });
   }
 
   findOne(orgId: number, id: number): Promise<User | undefined> {

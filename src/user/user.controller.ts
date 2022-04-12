@@ -24,6 +24,7 @@ import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { FindUsersParams } from './dtos/find-users-params.dto';
+import { ShowManyUserDto } from './dtos/show-many-user.dto';
 
 @Controller('users')
 @UsePipes(ZodValidationPipe)
@@ -79,6 +80,22 @@ export class UserController {
       throw new BadRequestException('query.filter: Required');
     }
     const users = await this.userService.searchByUsername(org.id, filter);
+    return {
+      users,
+    };
+  }
+
+  @Get('show-many')
+  @UseGuards(AuthGuard)
+  async showMany(
+    @Org() org: Organization,
+    @CurrentUser() user: User,
+    @Query() { ids }: ShowManyUserDto,
+  ) {
+    if (!user.isAgent()) {
+      throw new ForbiddenException();
+    }
+    const users = await this.userService.findByIds(org.id, ids);
     return {
       users,
     };
