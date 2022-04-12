@@ -5,7 +5,7 @@ import { UpdateCategorySchema } from './update-category-dto';
 export const BatchUpdateCategorySchema = z.object({
   categories: z.array(
     UpdateCategorySchema.extend({
-      id: z.number(),
+      id: z.number().int(),
     }),
   ),
 });
