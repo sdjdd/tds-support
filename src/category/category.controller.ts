@@ -26,9 +26,9 @@ export class CategoryController {
 
   @Get()
   async find(@Org() org: Organization) {
-    const catgories = await this.categoryService.find(org.id);
+    const categories = await this.categoryService.find(org.id);
     return {
-      catgories,
+      categories,
     };
   }
 
