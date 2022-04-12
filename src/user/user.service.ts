@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import _ from 'lodash';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -16,6 +16,17 @@ import { UserRole } from './types';
 export class UserService {
   @InjectRepository(User)
   private userRepository: Repository<User>;
+
+  searchByUsername(orgId: number, username: string): Promise<User[]> {
+    const prefix = username.replace(/%/g, '\\%');
+    return this.userRepository.find({
+      where: {
+        orgId,
+        username: Like(`${prefix}%`),
+      },
+      take: 10,
+    });
+  }
 
   find(
     orgId: number,

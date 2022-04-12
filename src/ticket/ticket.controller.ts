@@ -34,8 +34,7 @@ import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UpdateTicketDto } from './dtos/update-ticket.dto';
 import { FindTicketsDto } from './dtos/find-tickets.dto';
 import { CreateReplyDto } from './dtos/create-reply.dto';
-import { ParseFilterPipe } from './pipes/parse-filter.pipe';
-import { ParseFilterResult } from './utils/parse-filter-syntax';
+import { ParseFilterPipe, ParseFilterResult } from './pipes/parse-filter.pipe';
 
 @Controller('tickets')
 @UseGuards(AuthGuard)

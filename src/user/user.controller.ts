@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
@@ -61,6 +62,25 @@ export class UserController {
     const user = await this.userService.findOne(org.id, id);
     return {
       user,
+    };
+  }
+
+  @Get('search')
+  @UseGuards(AuthGuard)
+  async search(
+    @Org() org: Organization,
+    @CurrentUser() user: User,
+    @Query('filter') filter: string | undefined,
+  ) {
+    if (!user.isAgent()) {
+      throw new ForbiddenException();
+    }
+    if (!filter) {
+      throw new BadRequestException('query.filter: Required');
+    }
+    const users = await this.userService.searchByUsername(org.id, filter);
+    return {
+      users,
     };
   }
 

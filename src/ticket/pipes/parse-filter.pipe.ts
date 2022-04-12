@@ -1,6 +1,8 @@
 import { Injectable, PipeTransform } from '@nestjs/common';
 import validator from 'validator';
-import { parse } from '../utils/parse-filter-syntax';
+import { parse, ParseFilterResult } from '@/common/utils/parse-filter-syntax';
+
+export { ParseFilterResult };
 
 const isIntOrNone = (value: string) => {
   return value === 'none' || validator.isInt(value);
