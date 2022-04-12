@@ -13,6 +13,9 @@ const options: ConnectionOptions = {
   password: env[`MYSQL_ADMIN_PASSWORD_${LEANDB_INSTANCE_NAME}`],
   database: env.MYSQL_DATABASE || 'tds_support',
   migrations: [path.join(__dirname, 'migrations/*.{js,ts}')],
+  extra: {
+    timezone: 'UTC',
+  },
 };
 
 export default options;
