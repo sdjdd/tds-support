@@ -103,7 +103,7 @@ export class TicketController {
     }
 
     const skip = (page - 1) * pageSize;
-    if (skip + pageSize >= 10000) {
+    if (skip + pageSize > 10000) {
       // See: https://www.elastic.co/guide/en/elasticsearch/reference/7.9/index-modules.html#index-max-result-window
       throw new BadRequestException('cannot skip more than 10000 results');
     }
