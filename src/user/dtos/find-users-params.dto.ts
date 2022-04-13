@@ -1,12 +1,7 @@
 import { z } from 'zod';
 import { createZodDto } from '@anatine/zod-nestjs';
 import { UserRole } from '../types';
-
-function castInt(value: unknown) {
-  if (typeof value === 'string') {
-    return parseInt(value);
-  }
-}
+import { PaginationSchema } from '@/common/schemas/pagination.schema';
 
 const roleNames = {
   'end-user': UserRole.EndUser,
@@ -18,9 +13,7 @@ export const UserRoleSchema = z
   .enum(Object.keys(roleNames) as [string, ...string[]])
   .transform<number>((name) => roleNames[name]);
 
-export const FindUsersSchema = z.object({
-  page: z.preprocess(castInt, z.number().positive().default(1)),
-  pageSize: z.preprocess(castInt, z.number().positive().max(100).default(100)),
+export const FindUsersSchema = PaginationSchema.extend({
   role: z.union([UserRoleSchema, z.array(UserRoleSchema)]).optional(),
 });
 
