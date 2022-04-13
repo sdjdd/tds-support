@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   Query,
+  UnauthorizedException,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -25,6 +26,7 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { FindUsersParams } from './dtos/find-users-params.dto';
 import { ShowManyUserDto } from './dtos/show-many-user.dto';
+import { LoginDto } from './dtos/login.dto';
 
 @Controller('users')
 @UsePipes(ZodValidationPipe)
@@ -179,5 +181,21 @@ export class UserController {
     return {
       users,
     };
+  }
+
+  // TODO: finish this with session module
+  @Post('login')
+  async login(
+    @Org() org: Organization,
+    @Body() { username, password }: LoginDto,
+  ) {
+    const user = await this.userService.findOneByUsernameAndSelectPassword(
+      org.id,
+      username,
+    );
+    if (!user || !(await user.comparePassword(password))) {
+      throw new UnauthorizedException('username and password mismatch');
+    }
+    return { user };
   }
 }
