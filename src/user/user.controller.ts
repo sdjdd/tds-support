@@ -103,7 +103,7 @@ export class UserController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  findOne(
+  async findOne(
     @Org() org: Organization,
     @CurrentUser() currentUser: User,
     @Param('id', ParseIntPipe) id: number,
@@ -113,7 +113,10 @@ export class UserController {
         throw new ForbiddenException();
       }
     }
-    return this.userService.findOneOrFail(org.id, id);
+    const user = await this.userService.findOneOrFail(org.id, id);
+    return {
+      user,
+    };
   }
 
   @Get(':id/tickets/requested')
