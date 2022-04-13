@@ -9,5 +9,5 @@ function castInt(value: any) {
 
 export const PaginationSchema = z.object({
   page: z.preprocess(castInt, z.number().positive().default(1)),
-  pageSize: z.preprocess(castInt, z.number().positive().max(100).default(100)),
+  pageSize: z.preprocess(castInt, z.number().positive().max(100).default(10)),
 });
