@@ -1,4 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { OrganizationMiddleware } from './common';
@@ -17,6 +19,10 @@ import { TicketModule } from './ticket';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      exclude: ['/api*'],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [cacheConfig, queueConfig, sequenceConfig, elasticsearchConfig],
