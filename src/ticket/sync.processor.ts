@@ -54,6 +54,7 @@ export class SyncProcessor {
     }
     const doc = this.newSearchDoc(ticket);
     const updateData = _.pick(doc, job.data.fields);
+    updateData.updatedAt = doc.updatedAt;
     await this.client.update({
       index: 'ticket',
       id: ticket.id.toString(),
