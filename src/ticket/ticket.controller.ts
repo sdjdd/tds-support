@@ -253,12 +253,7 @@ export class TicketController {
     if (!user.isAgent()) {
       data.public = true;
     }
-    const replyId = await this.replyService.create(
-      org.id,
-      ticket.id,
-      user.id,
-      data,
-    );
+    const replyId = await this.replyService.create(org.id, ticket, user, data);
     const reply = await this.replyService.findOne(org.id, ticket.id, replyId);
     return {
       reply,

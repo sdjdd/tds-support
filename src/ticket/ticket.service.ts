@@ -17,7 +17,6 @@ import { UserService } from '@/user';
 import { status } from './constants';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
-import { UpdateTicketDto } from './dtos/update-ticket.dto';
 import {
   CreateSearchDocData,
   FindTicketsOptions,
@@ -118,7 +117,7 @@ export class TicketService {
     return ticket.id;
   }
 
-  async update(orgId: number, id: number, data: UpdateTicketDto) {
+  async update(orgId: number, id: number, data: Partial<Ticket>) {
     if (_.isEmpty(data)) {
       return;
     }
