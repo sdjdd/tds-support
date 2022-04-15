@@ -49,6 +49,12 @@ import { TicketModule } from './ticket';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(OrganizationMiddleware).forRoutes('*');
+    const versions = ['v1'];
+    const paths = ['categories', 'tickets', 'users'];
+    versions.forEach((version) => {
+      paths.forEach((path) => {
+        consumer.apply(OrganizationMiddleware).forRoutes(`${version}/${path}`);
+      });
+    });
   }
 }
