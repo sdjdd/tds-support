@@ -14,6 +14,6 @@ async function bootstrap() {
     new ExcludeNullInterceptor(),
     new ClassSerializerInterceptor(app.get(Reflector)),
   );
-  await app.listen(3000);
+  await app.listen(process.env.LEANCLOUD_APP_PORT ?? 3000);
 }
 bootstrap();
