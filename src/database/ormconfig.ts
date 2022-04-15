@@ -14,7 +14,7 @@ const options: ConnectionOptions = {
   database: env.MYSQL_DATABASE || 'tds_support',
   migrations: [path.join(__dirname, 'migrations/*.{js,ts}')],
   extra: {
-    timezone: 'Z',
+    timezone: '+00:00',
   },
 };
 
