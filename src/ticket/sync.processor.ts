@@ -1,11 +1,9 @@
-import { Client } from '@elastic/elasticsearch';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { InjectQueue, Process, Processor } from '@nestjs/bull';
 import { Job, Queue } from 'bull';
-import { Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import _ from 'lodash';
-import { ES_CLIENT } from '@/search';
 import { Ticket } from './entities/ticket.entity';
 import {
   CreateSearchDocData,
@@ -18,10 +16,9 @@ export class SyncProcessor {
   @InjectRepository(Ticket)
   private ticketRepository: Repository<Ticket>;
 
-  @Inject(ES_CLIENT)
-  private client: Client;
-
   constructor(
+    private esService: ElasticsearchService,
+
     @InjectQueue('search-index-ticket')
     private searchIndexQueue: Queue,
   ) {}
@@ -36,7 +33,7 @@ export class SyncProcessor {
       return;
     }
     const doc = this.newSearchDoc(ticket);
-    await this.client.create({
+    await this.esService.create({
       index: 'ticket',
       id: ticket.id.toString(),
       body: doc,
@@ -55,7 +52,7 @@ export class SyncProcessor {
     const doc = this.newSearchDoc(ticket);
     const updateData = _.pick(doc, job.data.fields);
     updateData.updatedAt = doc.updatedAt;
-    await this.client.update({
+    await this.esService.update({
       index: 'ticket',
       id: ticket.id.toString(),
       body: {
@@ -82,7 +79,7 @@ export class SyncProcessor {
     }
 
     const docs = tickets.map((ticket) => this.newSearchDoc(ticket));
-    await this.client.bulk({
+    await this.esService.bulk({
       body: docs
         .map((doc) => [
           {

@@ -28,11 +28,9 @@ import { TicketModule } from './ticket';
     }),
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configModule: ConfigService) => {
-        return {
-          redis: configModule.get('queue'),
-        };
-      },
+      useFactory: (configService: ConfigService) => ({
+        redis: configService.get('queue'),
+      }),
     }),
     CacheModule,
     DatabaseModule,
