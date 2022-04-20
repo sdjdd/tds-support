@@ -1,6 +1,12 @@
-import { Injectable, NestMiddleware, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  NestMiddleware,
+  NotFoundException,
+} from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import { Organization, OrganizationService } from '@/organization';
+import { ConfigService } from '@nestjs/config';
 
 declare module 'express' {
   interface Request {
@@ -10,21 +16,45 @@ declare module 'express' {
 
 @Injectable()
 export class OrganizationMiddleware implements NestMiddleware {
-  constructor(private organizationService: OrganizationService) {}
+  private baseUrl: string | undefined;
 
-  async use(req: Request, res: Response, next: NextFunction) {
-    const { subdomains } = req;
-    if (subdomains.length === 0) {
-      throw new NotFoundException();
+  constructor(
+    configService: ConfigService,
+    private organizationService: OrganizationService,
+  ) {
+    this.baseUrl = configService.get('baseUrl');
+  }
+
+  async use(req: Request, _res: Response, next: NextFunction) {
+    const subdomain = this.baseUrl
+      ? this.getSubdomainFromHostname(this.baseUrl, req.hostname)
+      : this.getSubdomainFromSubdomains(req.subdomains);
+    if (!subdomain) {
+      throw new BadGatewayException();
     }
-    const subdomain = subdomains[subdomains.length - 1];
+
     const organization = await this.organizationService.findOneBySubdomain(
       subdomain,
     );
     if (!organization) {
       throw new NotFoundException();
     }
+
     req.organization = organization;
     next();
+  }
+
+  private getSubdomainFromSubdomains(subdomains: string[]) {
+    if (subdomains.length) {
+      return subdomains[subdomains.length - 1];
+    }
+  }
+
+  private getSubdomainFromHostname(baseUrl: string, hostname: string) {
+    const length = hostname.length - baseUrl.length;
+    if (length > 1 && hostname.endsWith(baseUrl)) {
+      // use length - 1 to remove dot
+      return hostname.slice(0, length - 1);
+    }
   }
 }

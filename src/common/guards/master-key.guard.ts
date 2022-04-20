@@ -1,12 +1,13 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 
 @Injectable()
 export class MasterKeyGuard implements CanActivate {
-  private masterKey: string;
+  private masterKey: string | undefined;
 
-  constructor() {
-    this.masterKey = process.env.LEANCLOUD_APP_MASTER_KEY;
+  constructor(configService: ConfigService) {
+    this.masterKey = configService.get('masterKey');
   }
 
   canActivate(ctx: ExecutionContext): boolean {
