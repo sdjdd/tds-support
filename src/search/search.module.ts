@@ -1,20 +1,16 @@
-import { FactoryProvider, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Client } from '@elastic/elasticsearch';
-import { ES_CLIENT } from './constants';
-
-const esClientFactory: FactoryProvider = {
-  provide: ES_CLIENT,
-  inject: [ConfigService],
-  useFactory: (configService: ConfigService) => {
-    return new Client({
-      node: configService.get('elasticsearch.url'),
-    });
-  },
-};
+import { ElasticsearchModule } from '@nestjs/elasticsearch';
 
 @Module({
-  providers: [esClientFactory],
-  exports: [esClientFactory],
+  imports: [
+    ElasticsearchModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        node: configService.get('elasticsearch.url'),
+      }),
+    }),
+  ],
+  exports: [ElasticsearchModule],
 })
 export class SearchModule {}

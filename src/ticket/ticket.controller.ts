@@ -4,7 +4,6 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  Inject,
   Param,
   ParseIntPipe,
   Patch,
@@ -14,10 +13,10 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 import _ from 'lodash';
 import { AuthGuard, CurrentUser, Org } from '@/common';
 import { CaslAbilityFactory } from '@/casl';
-import { Client } from '@elastic/elasticsearch';
 import esb from 'elastic-builder';
 import { Organization } from '@/organization';
 import { User } from '@/user';
@@ -26,7 +25,6 @@ import {
   ParsePagePipe,
   ParsePageSizePipe,
 } from '@/common/pipes';
-import { ES_CLIENT } from '@/search';
 import { Ticket } from './entities/ticket.entity';
 import { ReplyService } from './reply.service';
 import { TicketService } from './ticket.service';
@@ -40,10 +38,9 @@ import { ParseFilterPipe, ParseFilterResult } from './pipes/parse-filter.pipe';
 @UseGuards(AuthGuard)
 @UsePipes(ZodValidationPipe)
 export class TicketController {
-  @Inject(ES_CLIENT) client: Client;
-
   constructor(
     private caslAbilityFactory: CaslAbilityFactory,
+    private esService: ElasticsearchService,
     private replyService: ReplyService,
     private ticketService: TicketService,
   ) {}
@@ -181,7 +178,7 @@ export class TicketController {
 
     const {
       body: { hits },
-    } = await this.client.search({ index: 'ticket', body });
+    } = await this.esService.search({ index: 'ticket', body });
 
     return {
       filter,
