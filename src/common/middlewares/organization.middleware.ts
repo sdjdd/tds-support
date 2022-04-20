@@ -51,10 +51,10 @@ export class OrganizationMiddleware implements NestMiddleware {
   }
 
   private getSubdomainFromHostname(baseUrl: string, hostname: string) {
-    const length = hostname.length - baseUrl.length;
-    if (length > 1 && hostname.endsWith(baseUrl)) {
-      // use length - 1 to remove dot
-      return hostname.slice(0, length - 1);
+    const suffix = '.' + baseUrl;
+    const length = hostname.length - suffix.length;
+    if (length > 0 && hostname.endsWith(suffix)) {
+      return hostname.slice(0, length);
     }
   }
 }
