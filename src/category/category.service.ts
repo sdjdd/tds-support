@@ -57,6 +57,14 @@ export class CategoryService {
     return category.users;
   }
 
+  async getUserIds(categoryId: number): Promise<number[]> {
+    const rows = await this.connection.query(
+      'SELECT user_id FROM category_users WHERE category_id = ?',
+      [categoryId],
+    );
+    return rows.map((row) => row.user_id);
+  }
+
   async addUser(orgId: number, id: number, userId: number) {
     const category = await this.findOneOrFail(orgId, id);
 

@@ -97,12 +97,15 @@ export class TicketService {
     await this.categoryService.findOneOrFail(orgId, data.categoryId);
     await this.userService.findOneOrFail(orgId, data.requesterId);
 
+    const assigneeIds = await this.categoryService.getUserIds(data.categoryId);
+
     const ticket = new Ticket();
     ticket.orgId = orgId;
     ticket.seq = await this.getNextSequence(orgId);
     ticket.status = status.new;
     ticket.requesterId = data.requesterId;
     ticket.categoryId = data.categoryId;
+    ticket.assigneeId = _.sample(assigneeIds);
     ticket.title = data.title;
     ticket.content = data.content;
     ticket.htmlContent = this.markdownService.render(data.content);
