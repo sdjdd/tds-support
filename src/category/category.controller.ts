@@ -1,7 +1,7 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -11,13 +11,13 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
-import { AuthGuard, CurrentUser, Org } from '@/common';
+import { AgentGuard, AuthGuard, Org } from '@/common';
 import { Organization } from '@/organization';
-import { User } from '@/user';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { UpdateCategoryDto } from './dtos/update-category-dto';
 import { BatchUpdateCategoryDto } from './dtos/batch-update-category.dto';
+import { AddUserDto } from './dtos/add-user.dto';
 
 @Controller('categories')
 @UsePipes(ZodValidationPipe)
@@ -43,16 +43,41 @@ export class CategoryController {
     };
   }
 
-  @Post()
-  @UseGuards(AuthGuard)
-  async create(
+  @Get(':id/users')
+  @UseGuards(AuthGuard, AgentGuard)
+  async findUsers(
     @Org() org: Organization,
-    @CurrentUser() user: User,
-    @Body() data: CreateCategoryDto,
+    @Param('id', ParseIntPipe) id: number,
   ) {
-    if (!user.isAgent()) {
-      throw new ForbiddenException();
-    }
+    const users = await this.categoryService.findUsers(org.id, id);
+    return {
+      users,
+    };
+  }
+
+  @Post(':id/users')
+  @UseGuards(AuthGuard, AgentGuard)
+  async addUser(
+    @Org() org: Organization,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: AddUserDto,
+  ) {
+    await this.categoryService.addUser(org.id, id, data.id);
+  }
+
+  @Delete(':id/users/:userId')
+  @UseGuards(AuthGuard, AgentGuard)
+  async removeUser(
+    @Org() org: Organization,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    await this.categoryService.removeUser(org.id, id, userId);
+  }
+
+  @Post()
+  @UseGuards(AuthGuard, AgentGuard)
+  async create(@Org() org: Organization, @Body() data: CreateCategoryDto) {
     const id = await this.categoryService.create(org.id, data);
     const category = await this.categoryService.findOne(org.id, id);
     return {
@@ -61,16 +86,12 @@ export class CategoryController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AgentGuard)
   async update(
     @Org() org: Organization,
-    @CurrentUser() user: User,
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateCategoryDto,
   ) {
-    if (!user.isAgent()) {
-      throw new ForbiddenException();
-    }
     await this.categoryService.update(org.id, id, data);
     const category = await this.categoryService.findOne(org.id, id);
     return {
@@ -79,15 +100,11 @@ export class CategoryController {
   }
 
   @Post('batch-update')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AgentGuard)
   async batchUpdate(
     @Org() org: Organization,
-    @CurrentUser() user: User,
     @Body() { categories: datas }: BatchUpdateCategoryDto,
   ) {
-    if (!user.isAgent()) {
-      throw new ForbiddenException();
-    }
     if (datas.length === 0) {
       return { categories: [] };
     }

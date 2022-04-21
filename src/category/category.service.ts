@@ -7,6 +7,7 @@ import {
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { Connection, EntityManager, In, Repository } from 'typeorm';
 import _ from 'lodash';
+import { User } from '@/user/entities/user.entity';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { UpdateCategoryDto } from './dtos/update-category-dto';
 import { Category } from './entities/category.entity';
@@ -19,6 +20,9 @@ export class CategoryService {
 
   @InjectRepository(Category)
   private categoryRepository: Repository<Category>;
+
+  @InjectRepository(User)
+  private userRepository: Repository<User>;
 
   find(orgId: number): Promise<Category[]> {
     return this.categoryRepository.find({ orgId });
@@ -38,6 +42,54 @@ export class CategoryService {
       throw new NotFoundException(`category ${id} does not exist`);
     }
     return category;
+  }
+
+  async findUsers(orgId: number, id: number): Promise<User[]> {
+    const category = await this.categoryRepository
+      .createQueryBuilder('category')
+      .leftJoinAndSelect('category.users', 'user')
+      .where('category.orgId = :orgId', { orgId })
+      .andWhere('category.id = :id', { id })
+      .getOne();
+    if (!category) {
+      throw new NotFoundException(`category ${id} does not exist`);
+    }
+    return category.users;
+  }
+
+  async addUser(orgId: number, id: number, userId: number) {
+    const category = await this.findOneOrFail(orgId, id);
+
+    const user = await this.userRepository.findOne({
+      where: { orgId, id: userId },
+    });
+    if (!user) {
+      throw new UnprocessableEntityException(`User ${userId} does not exist`);
+    }
+    if (!user.isAgent()) {
+      throw new UnprocessableEntityException(`User ${userId} is not an agent`);
+    }
+
+    try {
+      await this.categoryRepository
+        .createQueryBuilder()
+        .relation('users')
+        .of(category)
+        .add(userId);
+    } catch (error) {
+      if (error.errno !== 1062) {
+        throw error;
+      }
+    }
+  }
+
+  async removeUser(orgId: number, id: number, userId: number) {
+    const category = await this.findOneOrFail(orgId, id);
+    await this.categoryRepository
+      .createQueryBuilder()
+      .relation('users')
+      .of(category)
+      .remove(userId);
   }
 
   async create(orgId: number, data: CreateCategoryDto): Promise<number> {
