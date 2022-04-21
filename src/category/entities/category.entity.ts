@@ -1,8 +1,11 @@
+import { User } from '@/user';
 import { Exclude, Expose } from 'class-transformer';
 import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -43,6 +46,14 @@ export class Category {
 
   @Column()
   position?: number;
+
+  @ManyToMany(() => User, (user) => user.categories)
+  @JoinTable({
+    name: 'category_users',
+    joinColumn: { name: 'category_id' },
+    inverseJoinColumn: { name: 'user_id' },
+  })
+  users?: User[];
 
   @Column({ name: 'created_at' })
   @Expose()

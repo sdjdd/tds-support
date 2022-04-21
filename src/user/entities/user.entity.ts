@@ -1,6 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import argon2 from 'argon2';
+import { Category } from '@/category/entities/category.entity';
 import { UserRole } from '../types';
 
 @Entity('user')
@@ -26,6 +27,9 @@ export class User {
 
   @Column()
   role: UserRole;
+
+  @ManyToMany(() => Category, (category) => category.users)
+  categories?: Category[];
 
   @Column({ name: 'created_at' })
   @Expose()
